@@ -1,10 +1,11 @@
 package util;
 
-import view.*;
 import javax.swing.*;
+import java.awt.*;
 
-import javax.swing.*;
 
+
+//Segéd osztály a MainMenunek
 public class MainMenuUtil {
 
     private static boolean isFullScreen = true;
