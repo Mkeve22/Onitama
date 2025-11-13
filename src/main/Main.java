@@ -1,4 +1,5 @@
 import view.MainMenu;
+import view.NewGameMenu;
 
 import javax.swing.*;
 
