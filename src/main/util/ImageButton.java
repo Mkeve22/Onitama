@@ -9,14 +9,14 @@ public class ImageButton extends JButton {
     private final ImageIcon pressedImage;
 
 
-    public ImageButton(String imagePath, String pressedImagePath) {
+    public ImageButton(String imagePath, String pressedImagePath, int width, int height) {
         image = new ImageIcon(getClass().getResource(imagePath)).getImage();
         pressedImage = new ImageIcon(getClass().getResource(pressedImagePath));
         setContentAreaFilled(false);
         setBorderPainted(false);
         setFocusPainted(false);
         setOpaque(false);
-        Dimension dimension = new Dimension(328, 80);
+        Dimension dimension = new Dimension(width, height);
         setPreferredSize(dimension);
         setMinimumSize(dimension);
         setMaximumSize(dimension);

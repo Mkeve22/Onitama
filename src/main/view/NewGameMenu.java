@@ -10,8 +10,8 @@ import java.awt.event.ActionListener;
 
 public class NewGameMenu  extends JFrame {
 
-    private JButton backmain = new ImageButton("/NewGameMenu/backmenu_button.png", "/NewGameMenu/backmenu_button_press.png");
-    private JButton start = new ImageButton("/NewGameMenu/start_button.png", "/NewGameMenu/start_button_press.png");
+    private JButton backmain = new ImageButton("/NewGameMenu/backmenu_button.png", "/NewGameMenu/backmenu_button_press.png" ,372, 104);
+    private JButton start = new ImageButton("/NewGameMenu/start_button.png", "/NewGameMenu/start_button_press.png", 372, 104);
     private JComboBox<ImageIcon> options;
 
 
@@ -28,7 +28,7 @@ public class NewGameMenu  extends JFrame {
         setContentPane(backgroundPanel);
 
         //Escape billentyű működése
-        new EscapeKeyBinding(this);
+        //new EscapeKeyBinding(this);
         backmain.addActionListener(new MainMenuActionListener(this));
 
         //Combo box elemei

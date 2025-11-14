@@ -10,9 +10,9 @@ import java.awt.event.ActionListener;
 
 public class MainMenu extends JFrame {
 
-    private JButton newGameButton =  new ImageButton("/MainMenu/newgame_button.png", "/MainMenu/newgame_button_press.png");
-    private JButton loadButton =  new ImageButton("/MainMenu/load_button.png", "/MainMenu/load_button_press.png");
-
+    private JButton newGameButton =  new ImageButton("/MainMenu/newgame.png", "/MainMenu/newgame_press.png", 294, 74);
+    private JButton loadButton =  new ImageButton("/MainMenu/load.png", "/MainMenu/load_press.png", 294, 74);
+    private JButton quit = new ImageButton("/MainMenu/quit.png", "/MainMenu/quit_press.png", 294, 74);
 
     public MainMenu() {
         setTitle("Onitama");
@@ -30,8 +30,10 @@ public class MainMenu extends JFrame {
         setContentPane(backgroundPanel);
 
         // Escape billentyű működése
-        new EscapeKeyBinding(this);
+        //new EscapeKeyBinding(this);
         newGameButton.addActionListener(new NewGameActionListener(this));
+        quit.addActionListener(new QuitActionListener(this));
+        loadButton.addActionListener(new LoadButtonListener(this));
 
 
         // gombokat tartalmazó panel
@@ -44,6 +46,8 @@ public class MainMenu extends JFrame {
         buttonPanel.add(newGameButton);
         buttonPanel.add(Box.createVerticalStrut(30));
         buttonPanel.add(loadButton);
+        buttonPanel.add(Box.createVerticalStrut(30));
+        buttonPanel.add(quit);
 
         // középre helyezés a GridBagLayout segítségével
         GridBagConstraints gbc = new GridBagConstraints();
@@ -80,6 +84,44 @@ public class MainMenu extends JFrame {
             newGame.setVisible(true);
 
             // Bezárjuk a régit
+            currentFrame.dispose();
+        }
+    }
+
+    class QuitActionListener implements ActionListener {
+        private final JFrame currentFrame;
+
+        public QuitActionListener(JFrame currentFrame) {
+            this.currentFrame = currentFrame;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            currentFrame.dispose();
+        }
+    }
+
+    class LoadButtonListener implements ActionListener {
+        private final JFrame currentFrame;
+
+        public LoadButtonListener(JFrame currentFrame) {
+            this.currentFrame = currentFrame;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            LoadMenu menu = new LoadMenu();
+
+            if (ScreenUtil.isFullScreen()) {
+                menu.setUndecorated(true);
+                menu.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            }
+            else {
+                menu.setSize(currentFrame.getSize());
+                menu.setLocation(currentFrame.getLocation());
+            }
+
+            menu.setVisible(true);
             currentFrame.dispose();
         }
     }
