@@ -1,3 +1,4 @@
+import view.LoadMenu;
 import view.MainMenu;
 import view.NewGameMenu;
 
