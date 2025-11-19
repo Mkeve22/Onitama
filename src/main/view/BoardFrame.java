@@ -1,11 +1,15 @@
 package view;
 
+import game.*;
 import util.*;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class BoardFrame extends JFrame {
+
+    private CardPanel selectedCardPanel = null;
+
 
     public BoardFrame() {
         setTitle("Onitama");
@@ -20,12 +24,24 @@ public class BoardFrame extends JFrame {
         backgroundPanel.setLayout(new BorderLayout());
         setContentPane(backgroundPanel);
 
+        //Deck létrehozása
+        DeckManager deck = new DeckManager(new BaseCardLibrary());
+        deck.dealcard();
+
         //FELSŐ 2 KÁRTYAHELY
         JPanel topCards = new JPanel();
         topCards.setOpaque(false);
         topCards.setPreferredSize(new Dimension(0, 250));
         topCards.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 20));
+        topCards.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0)); // <<< ITT
+
+
         backgroundPanel.add(topCards, BorderLayout.NORTH);
+        for (Card c : deck.getPlayer2Cards()){
+            CardPanel cp = new CardPanel(c);
+            cp.addPropertyChangeListener("selected", evt -> handleCardSelection(cp));
+            topCards.add(cp);
+        }
 
 
 
@@ -34,7 +50,14 @@ public class BoardFrame extends JFrame {
         bottomCards.setOpaque(false);
         bottomCards.setPreferredSize(new Dimension(0, 250));
         bottomCards.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 20));
+        bottomCards.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0)); // <<< ITT
+
         backgroundPanel.add(bottomCards, BorderLayout.SOUTH);
+        for (Card c : deck.getPlayer1Cards()){
+            CardPanel cp = new CardPanel(c);
+            cp.addPropertyChangeListener("selected", evt -> handleCardSelection(cp));
+            bottomCards.add(cp);
+        }
 
 
 
@@ -44,6 +67,7 @@ public class BoardFrame extends JFrame {
         sideCard.setPreferredSize(new Dimension(600, 0));
         sideCard.setLayout(new GridBagLayout());
         backgroundPanel.add(sideCard, BorderLayout.WEST);
+        sideCard.add(new CardPanel(deck.getCenter()));
 
 
         //JOBB OLDALI GOMBOK
@@ -92,4 +116,20 @@ public class BoardFrame extends JFrame {
 
         setVisible(true);
     }
+
+    private void handleCardSelection(CardPanel clicked) {
+        // Ha kattintottak egy új kártyára → előző kijelöltet töröljük
+        if (selectedCardPanel != null && selectedCardPanel != clicked) {
+            selectedCardPanel.setSelected(false);  // kikapcsoljuk előzőt
+            selectedCardPanel.repaint();
+        }
+
+        // Ha ugyanarra kattint → kikapcsoljuk
+        if (clicked == selectedCardPanel) {
+            selectedCardPanel = null;
+        } else {
+            selectedCardPanel = clicked;
+        }
+    }
+
 }
