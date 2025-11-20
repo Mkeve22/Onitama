@@ -88,14 +88,8 @@ public class NewGameMenu  extends JFrame {
         public void actionPerformed(ActionEvent e) {
             MainMenu menu = new MainMenu();
 
-            if (ScreenUtil.isFullScreen()) {
-                menu.setUndecorated(true);
-                menu.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }
-            else {
-                menu.setSize(frame.getSize());
-                menu.setLocation(frame.getLocation());
-            }
+            menu.setUndecorated(true);
+            menu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
             menu.setVisible(true);
             frame.dispose();

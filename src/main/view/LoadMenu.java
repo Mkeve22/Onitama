@@ -1,9 +1,7 @@
 package view;
 
 import util.BackgroundPanel;
-import util.EscapeKeyBinding;
 import util.ImageButton;
-import util.ScreenUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +18,6 @@ public class LoadMenu extends JFrame {
         setTitle("Onitama");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setIconImage(new  ImageIcon(getClass().getResource("/icon.png")).getImage());
-        setMinimumSize(new Dimension(800,1000));
 
         setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -30,7 +27,7 @@ public class LoadMenu extends JFrame {
         backgroundPanel.setLayout(new GridBagLayout());
         setContentPane(backgroundPanel);
 
-        //new EscapeKeyBinding(this);
+        //Action listenerek hozzáadása a gombokhoz
         backmenu.addActionListener(new BackButtonListener(this));
 
 
@@ -73,14 +70,8 @@ public class LoadMenu extends JFrame {
         public void actionPerformed(ActionEvent e) {
             MainMenu mainMenu = new MainMenu();
 
-            if (ScreenUtil.isFullScreen()){
-                mainMenu.setUndecorated(true);
-                mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }
-            else {
-                mainMenu.setSize(loadMenu.getSize());
-                mainMenu.setLocation(loadMenu.getLocation());
-            }
+            mainMenu.setUndecorated(true);
+            mainMenu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
             mainMenu.setVisible(true);
             loadMenu.dispose();

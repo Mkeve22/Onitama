@@ -18,19 +18,16 @@ public class MainMenu extends JFrame {
         setTitle("Onitama");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setIconImage(new ImageIcon(getClass().getResource("/icon.png")).getImage());
-        if (ScreenUtil.isFullScreen()) {
-            setUndecorated(true); // eltávolítja az ablak keretét
-            setExtendedState(JFrame.MAXIMIZED_BOTH); // teljes képernyőre vált
-        }
-        setMinimumSize(new Dimension(800,1000));
+
+        setUndecorated(true); // eltávolítja az ablak keretét
+        setExtendedState(JFrame.MAXIMIZED_BOTH); // teljes képernyőre vál
 
         // Egyedi háttérpanel, ami méretezéskor újrarajzolja a képet
         BackgroundPanel backgroundPanel = new BackgroundPanel("/MainMenu/back_ground.png");
         backgroundPanel.setLayout(new GridBagLayout());
         setContentPane(backgroundPanel);
 
-        // Escape billentyű működése
-        //new EscapeKeyBinding(this);
+        //Actionok hozzáadása a gombokhoz
         newGameButton.addActionListener(new NewGameActionListener(this));
         quit.addActionListener(new QuitActionListener(this));
         loadButton.addActionListener(new LoadButtonListener(this));
@@ -70,15 +67,8 @@ public class MainMenu extends JFrame {
             // Új ablak létrehozása
             NewGameMenu newGame = new NewGameMenu();
 
-            if (ScreenUtil.isFullScreen()) {
-                newGame.setUndecorated(true); // eltávolítja az ablak keretét
-                newGame.setExtendedState(JFrame.MAXIMIZED_BOTH); // teljes képernyőre vált
-            }
-            else {
-                // Átmásoljuk a méretet és pozíciót
-                newGame.setSize(currentFrame.getSize());
-                newGame.setLocation(currentFrame.getLocation());
-            }
+            newGame.setUndecorated(true); // eltávolítja az ablak keretét
+            newGame.setExtendedState(JFrame.MAXIMIZED_BOTH); // teljes képernyőre vált
 
             // Láthatóvá tesszük
             newGame.setVisible(true);
@@ -112,14 +102,8 @@ public class MainMenu extends JFrame {
         public void actionPerformed(ActionEvent ae) {
             LoadMenu menu = new LoadMenu();
 
-            if (ScreenUtil.isFullScreen()) {
-                menu.setUndecorated(true);
-                menu.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            }
-            else {
-                menu.setSize(currentFrame.getSize());
-                menu.setLocation(currentFrame.getLocation());
-            }
+            menu.setUndecorated(true);
+            menu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
             menu.setVisible(true);
             currentFrame.dispose();

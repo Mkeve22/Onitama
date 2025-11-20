@@ -13,16 +13,11 @@ public class BoardFrame extends JFrame {
     private TilePanel selectedTile = null;
     private TilePanel[][] tileGrid = new TilePanel[5][5];
 
-
-
-
-
     public BoardFrame(GameState gameState) {
         this.gameState = gameState;
         setTitle("Onitama");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setIconImage(new ImageIcon(getClass().getResource("/icon.png")).getImage());
-        setMinimumSize(new Dimension(800, 1000));
         setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
 
@@ -40,7 +35,7 @@ public class BoardFrame extends JFrame {
         topCards.setOpaque(false);
         topCards.setPreferredSize(new Dimension(0, 250));
         topCards.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 20));
-        topCards.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0)); // <<< ITT
+        topCards.setBorder(BorderFactory.createEmptyBorder(40, 0, 0, 0));
 
 
         backgroundPanel.add(topCards, BorderLayout.NORTH);
@@ -59,7 +54,7 @@ public class BoardFrame extends JFrame {
         bottomCards.setOpaque(false);
         bottomCards.setPreferredSize(new Dimension(0, 250));
         bottomCards.setLayout(new FlowLayout(FlowLayout.CENTER, 40, 20));
-        bottomCards.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0)); // <<< ITT
+        bottomCards.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         backgroundPanel.add(bottomCards, BorderLayout.SOUTH);
         CardPanel p1c1 = new CardPanel(gameState.getP1Card1(), true);
@@ -102,9 +97,6 @@ public class BoardFrame extends JFrame {
 
         JPanel center = new JPanel(new GridBagLayout());
         center.setOpaque(false);
-
-
-
         backgroundPanel.add(center, BorderLayout.CENTER);
 
         //KÖZÉPSŐ TÁBLA
@@ -117,16 +109,13 @@ public class BoardFrame extends JFrame {
         gbc.gridy = 0;
         center.add(centerBoard, gbc);
 
-        // mezők szélének szinezése
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 5; col++) {
                 TilePanel tile = new TilePanel(col, row, gameState, this);
-                tileGrid[row][col] = tile;   // ← eltároljuk
+                tileGrid[row][col] = tile;
                 centerBoard.add(tile);
             }
         }
-
-        setVisible(true);
     }
 
     private void updateHighlights() {
@@ -142,21 +131,29 @@ public class BoardFrame extends JFrame {
             return;
         }
 
-        Card card = selectedCardPanel.getCard();   // <-- kell CardPanel.getCard()
+        Card card = selectedCardPanel.getCard();
         Piece piece = gameState.getBoard()[selectedTile.getTileY()][selectedTile.getTileX()];
 
-        if (piece == null) return;                 // nincs bábu a kijelölt mezőn
+        if (piece == null) {
+            return;                 // nincs bábu a kijelölt mezőn
+        }
         int owner = piece.getOwner();
-
-        // játékos irány (Player1 = felfelé, Player2 = lefelé)
-        int direction = (owner == 1 ? -1 : 1);
 
         int fromX = selectedTile.getTileX();
         int fromY = selectedTile.getTileY();
 
         for (int[] m : card.getMoves()) {
             int dx = m[0];
-            int dy = m[1] * direction;  // fontos: irány függő
+            int dy = m[1];
+
+            // fontos: irány függő
+            if (owner == 1) {
+                dy = -dy;
+            }
+            else {
+                dx = -dx;
+            }
+
 
             int tx = fromX + dx;
             int ty = fromY + dy;
@@ -192,7 +189,7 @@ public class BoardFrame extends JFrame {
     public void handleTileClick(int x, int y) {
 
         // A TilePanel példányt onnan kapjuk meg, ahol eltároltuk őket
-        TilePanel clicked = tileGrid[y][x];  // ← mindjárt leírom hogyan hozzuk létre
+        TilePanel clicked = tileGrid[y][x];
 
         // Ha más mező volt kijelölve → azt töröljük
         if (selectedTile != null && selectedTile != clicked) {
@@ -208,7 +205,5 @@ public class BoardFrame extends JFrame {
             selectedTile = clicked;
         }
         updateHighlights();
-
     }
-
 }
