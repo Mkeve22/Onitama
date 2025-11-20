@@ -24,4 +24,6 @@ public class Card {
     public int[][] getMoves() {
         return moves;
     }
+
+
 }
