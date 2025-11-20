@@ -12,14 +12,15 @@ public class CardPanel extends JPanel {
     private Image cardImage;
     private Boolean selected = false;
 
-     public CardPanel(Card card) {
+     public CardPanel(Card card, boolean isselected) {
          this.card = card;
          this.cardImage = new ImageIcon(getClass().getResource(card.getImagepath())).getImage();
 
          setPreferredSize(new Dimension(249, 145));
          setOpaque(false);
-
-         addMouseListener(new CardClickListener(this));
+        if(isselected) {
+            addMouseListener(new CardClickListener(this));
+        }
      }
 
      public Boolean isSelected() {

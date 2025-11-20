@@ -105,4 +105,6 @@ public class GameState {
     private void switchPlayer() {
         currentPlayer = (currentPlayer == player1 ? player2 : player1);
     }
+
+
 }
