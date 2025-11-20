@@ -53,10 +53,7 @@ public class TilePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // ───────────────────────────────
         // 1) KIRÁLY MEZŐ SZÍNEZÉS
-        // ───────────────────────────────
-
         if (x == 2 && y == 0) {
             g.setColor(new Color(40, 90, 200, 180)); // kék
             g.fillRect(0, 0, getWidth(), getHeight());
@@ -67,9 +64,7 @@ public class TilePanel extends JPanel {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // ───────────────────────────────
         // 2) BÁBU KIRAJZOLÁSA
-        // ───────────────────────────────
         Piece p = state.getBoard()[y][x];
 
         if (p != null) {
@@ -86,15 +81,13 @@ public class TilePanel extends JPanel {
                     null);
         }
 
-        // 🔥 MOD – ha lehetséges lépés → zöld háttér
-        if (highlighted) {                                  // <-- MOD
-            g.setColor(new Color(0, 255, 0, 120));          // <-- MOD
-            g.fillRect(0, 0, getWidth(), getHeight());      // <-- MOD
+        //ha lehetséges lépés → zöld háttér
+        if (highlighted) {
+            g.setColor(new Color(0, 255, 0, 120));
+            g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // ───────────────────────────────
-        // 3) KERET (FEHÉR / SÁRGA)
-        // ───────────────────────────────
+        // 3) KERET FEHÉR
         Graphics2D g2 = (Graphics2D) g;
 
         if (selected) {
