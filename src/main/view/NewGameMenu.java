@@ -1,6 +1,7 @@
 package view;
 
 import util.*;
+import game.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,6 +31,7 @@ public class NewGameMenu  extends JFrame {
         //Escape billentyű működése
         //new EscapeKeyBinding(this);
         backmain.addActionListener(new MainMenuActionListener(this));
+        start.addActionListener(new StartGameActionListener(this));
 
         //Combo box elemei
         ImageIcon pvp = new ImageIcon(getClass().getResource("/NewGameMenu/twoplayer_button_rounded.png"));
@@ -92,6 +94,58 @@ public class NewGameMenu  extends JFrame {
             menu.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
             menu.setVisible(true);
+            frame.dispose();
+        }
+    }
+
+    class StartGameActionListener implements ActionListener {
+        private NewGameMenu frame;
+
+        public StartGameActionListener(NewGameMenu frame) {
+            this.frame = frame;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            GameMode mode;
+            switch (options.getSelectedIndex()) {
+                case 0: mode = GameMode.PLAYER_VS_PLAYER; break;
+                case 1: mode = GameMode.PLAYER_VS_AI; break;
+                case 2: mode = GameMode.AI_VS_AI; break;
+                default: mode = GameMode.PLAYER_VS_PLAYER;
+            }
+
+            // JÁTÉKOSOK LÉTREHOZÁSA
+            Player p1;
+            Player p2;
+
+            switch (mode) {
+                case PLAYER_VS_PLAYER:
+                    p1 = new HumanPlayer(1);
+                    p2 = new HumanPlayer(2);
+                    break;
+
+                case PLAYER_VS_AI:
+                    p1 = new HumanPlayer(1);
+                    p2 = new AIPlayer(2);
+                    break;
+
+                case AI_VS_AI:
+                    p1 = new AIPlayer(1);
+                    p2 = new AIPlayer(2);
+                    break;
+
+                default:
+                    p1 = new HumanPlayer(1);
+                    p2 = new HumanPlayer(2);
+            }
+
+            GameState gs = new GameState(p1, p2, mode);
+
+            BoardFrame bf = new BoardFrame(gs);
+            bf.setVisible(true);
+
             frame.dispose();
         }
     }

@@ -20,15 +20,22 @@ public class GameState {
 
     private DeckManager deck;
 
+    private GameMode mode;
 
-    public GameState(Player p1, Player p2) {
+
+
+    public GameState(Player p1, Player p2, GameMode mode) {
         this.player1 = p1;
         this.player2 = p2;
         this.currentPlayer = player1;
+        this.mode = mode;
 
         initBoard();
         initDeck();
     }
+
+    public GameMode getMode() { return mode; }
+
 
     private void initBoard() {
 
