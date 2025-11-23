@@ -22,6 +22,7 @@ public class GameState {
 
     private GameMode mode;
 
+    private Integer winner = null;  // 1 vagy 2, ha már van győztes
 
 
     public GameState(Player p1, Player p2, GameMode mode) {
@@ -35,6 +36,14 @@ public class GameState {
     }
 
     public GameMode getMode() { return mode; }
+
+    public Integer getWinner() {
+        return winner;
+    }
+
+    public boolean isGameOver() {
+        return winner != null;
+    }
 
 
     private void initBoard() {
@@ -100,12 +109,60 @@ public class GameState {
     }
 
     public boolean makeMove(Move move) {
-        // TODO: Validálás
-        // TODO: Lépés
-        // TODO: Ütés
-        // TODO: Kártyacsere
-        // TODO: Győzelem ellenőrzés
+        int fx = move.fromX;
+        int fy = move.fromY;
+        int tx = move.toX;
+        int ty = move.toY;
 
+        Piece piece = board[fy][fx];
+        if (piece == null) return false;
+
+        // Ha van ellenfél bábu → leütjük
+        Piece target = board[ty][tx];
+        if (target != null && target.getOwner() != piece.getOwner()) {
+            // ❗ Master leütve? → azonnali győzelem
+            if (target.isMaster()) {
+                winner = piece.getOwner();
+                // opcionálisan még átrakhatod a bábut:
+                board[ty][tx] = piece;
+                board[fy][fx] = null;
+                return true;  // nem váltunk játékost, vége a játéknak
+            }
+
+            board[ty][tx] = null; // sima bábu leütve
+        }
+
+        // Mozgatás
+        board[ty][tx] = piece;
+        board[fy][fx] = null;
+
+        // Temple Victory (master a másik templomán)
+        if (piece.isMaster()) {
+            if (piece.getOwner() == 1 && tx == 2 && ty == 0) {
+                winner = 1;
+                return true;
+            }
+            if (piece.getOwner() == 2 && tx == 2 && ty == 4) {
+                winner = 2;
+                return true;
+            }
+        }
+
+        // KÁRTYACSERE
+        Card used = move.card;
+
+        if (piece.getOwner() == 1) {
+            if (p1Card1 == used) p1Card1 = centerCard;
+            else p1Card2 = centerCard;
+        } else {
+            if (p2Card1 == used) p2Card1 = centerCard;
+            else p2Card2 = centerCard;
+        }
+
+        centerCard = used;
+
+        // Játékosváltás
+        switchPlayer();
         return true;
     }
 

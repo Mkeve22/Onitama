@@ -14,9 +14,21 @@ public class TilePanel extends JPanel {
     // 🔥 MOD – új flag a zöld kiemeléshez
     private boolean highlighted = false;            // <-- MOD
 
+
+    private static final Image redMaster   = new ImageIcon(TilePanel.class.getResource("/Piece/red_master.png")).getImage();
+    private static final Image redStudent  = new ImageIcon(TilePanel.class.getResource("/Piece/red_student.png")).getImage();
+    private static final Image blueMaster  = new ImageIcon(TilePanel.class.getResource("/Piece/blue_master.png")).getImage();
+    private static final Image blueStudent = new ImageIcon(TilePanel.class.getResource("/Piece/blue_student.png")).getImage();
+
+
     // 🔥 MOD – setter/getter
     public void setHighlighted(boolean h) {         // <-- MOD
         this.highlighted = h;
+        repaint();
+    }
+
+    public void updatePiece() {
+        // Ha később lesz saját lokális állapot, itt tudod frissíteni.
         repaint();
     }
 
@@ -24,10 +36,7 @@ public class TilePanel extends JPanel {
         return highlighted;
     }
 
-    private static final Image redMaster   = new ImageIcon(TilePanel.class.getResource("/Piece/red_master.png")).getImage();
-    private static final Image redStudent  = new ImageIcon(TilePanel.class.getResource("/Piece/red_student.png")).getImage();
-    private static final Image blueMaster  = new ImageIcon(TilePanel.class.getResource("/Piece/blue_master.png")).getImage();
-    private static final Image blueStudent = new ImageIcon(TilePanel.class.getResource("/Piece/blue_student.png")).getImage();
+
 
     public TilePanel(int x, int y, GameState state, BoardFrame controller) {
         this.x = x;

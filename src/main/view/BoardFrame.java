@@ -13,6 +13,14 @@ public class BoardFrame extends JFrame {
     private TilePanel selectedTile = null;
     private TilePanel[][] tileGrid = new TilePanel[5][5];
 
+    private CardPanel p2c1Panel;
+    private CardPanel p2c2Panel;
+
+    private CardPanel p1c1Panel;
+    private CardPanel p1c2Panel;
+
+    private CardPanel centerPanel;
+
     public BoardFrame(GameState gameState) {
         this.gameState = gameState;
         setTitle("Onitama");
@@ -39,13 +47,13 @@ public class BoardFrame extends JFrame {
 
 
         backgroundPanel.add(topCards, BorderLayout.NORTH);
-        CardPanel p2c1 = new CardPanel(gameState.getP2Card1(), true);
-        p2c1.addPropertyChangeListener("selected", evt -> handleCardSelection(p2c1));
-        topCards.add(p2c1);
+        p2c1Panel = new CardPanel(gameState.getP2Card1(), true);
+        p2c1Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p2c1Panel));
+        topCards.add(p2c1Panel);
 
-        CardPanel p2c2 = new CardPanel(gameState.getP2Card2(), true);
-        p2c2.addPropertyChangeListener("selected", evt -> handleCardSelection(p2c2));
-        topCards.add(p2c2);
+        p2c2Panel = new CardPanel(gameState.getP2Card2(), true);
+        p2c2Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p2c2Panel));
+        topCards.add(p2c2Panel);
 
 
 
@@ -57,13 +65,14 @@ public class BoardFrame extends JFrame {
         bottomCards.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         backgroundPanel.add(bottomCards, BorderLayout.SOUTH);
-        CardPanel p1c1 = new CardPanel(gameState.getP1Card1(), true);
-        p1c1.addPropertyChangeListener("selected", evt -> handleCardSelection(p1c1));
-        bottomCards.add(p1c1);
 
-        CardPanel p1c2 = new CardPanel(gameState.getP1Card2(), true);
-        p1c2.addPropertyChangeListener("selected", evt -> handleCardSelection(p1c2));
-        bottomCards.add(p1c2);
+        p1c1Panel = new CardPanel(gameState.getP1Card1(), true);
+        p1c1Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p1c1Panel));
+        bottomCards.add(p1c1Panel);
+
+        p1c2Panel = new CardPanel(gameState.getP1Card2(), true);
+        p1c2Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p1c2Panel));
+        bottomCards.add(p1c2Panel);
 
 
 
@@ -73,7 +82,9 @@ public class BoardFrame extends JFrame {
         sideCard.setPreferredSize(new Dimension(600, 0));
         sideCard.setLayout(new GridBagLayout());
         backgroundPanel.add(sideCard, BorderLayout.WEST);
-        sideCard.add(new CardPanel(gameState.getCenterCard(), false));
+
+        centerPanel = new CardPanel(gameState.getCenterCard(), false);
+        sideCard.add(centerPanel);
 
 
         //JOBB OLDALI GOMBOK
@@ -170,6 +181,8 @@ public class BoardFrame extends JFrame {
     }
 
     private void handleCardSelection(CardPanel clicked) {
+
+
         // Ha kattintottak egy új kártyára → előző kijelöltet töröljük
         if (selectedCardPanel != null && selectedCardPanel != clicked) {
             selectedCardPanel.setSelected(false);  // kikapcsoljuk előzőt
@@ -190,6 +203,59 @@ public class BoardFrame extends JFrame {
 
         // A TilePanel példányt onnan kapjuk meg, ahol eltároltuk őket
         TilePanel clicked = tileGrid[y][x];
+        Piece piece = gameState.getBoard()[y][x];
+
+
+        // ❗ Saját kör szabály
+        if (selectedTile == null) {
+            if (piece != null && piece.getOwner() != gameState.getCurrentPlayer().getId()) {
+                return; // nem a te bábud, nem jelölheted ki
+            }
+        }
+
+        // Ha a mező ki van emelve zölddel → lépni kell!
+        if (clicked.isHighlighted() && selectedTile != null && selectedCardPanel != null) {
+
+            // Lépés létrehozása
+            Move move = new Move(
+                    selectedTile.getTileX(),
+                    selectedTile.getTileY(),
+                    x, y,
+                    selectedCardPanel.getCard()
+            );
+
+            // GameState lépés végrehajtása
+            gameState.makeMove(move);
+
+            // UI frissítés
+            refreshBoard();
+            refreshCards();
+
+            enableCardListenersForCurrentPlayer();
+
+
+            // Győzelem ellenőrzés
+            if (gameState.isGameOver()) {
+                int w = gameState.getWinner();
+                JOptionPane.showMessageDialog(this,
+                        "Player " + w + " wins!",
+                        "Game Over",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                dispose(); // vagy vissza a menübe
+                return;
+            }
+
+            // Jelölések törlése
+            selectedTile.setSelected(false);
+            selectedTile = null;
+
+            selectedCardPanel.setSelected(false);
+            selectedCardPanel = null;
+
+            updateHighlights();
+            return;
+        }
 
         // Ha más mező volt kijelölve → azt töröljük
         if (selectedTile != null && selectedTile != clicked) {
@@ -205,5 +271,47 @@ public class BoardFrame extends JFrame {
             selectedTile = clicked;
         }
         updateHighlights();
+    }
+
+    public void refreshBoard() {
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                tileGrid[y][x].updatePiece();
+            }
+        }
+        repaint();
+    }
+
+    public void refreshCards() {
+        p1c1Panel.setCard(gameState.getP1Card1());
+        p1c2Panel.setCard(gameState.getP1Card2());
+        p2c1Panel.setCard(gameState.getP2Card1());
+        p2c2Panel.setCard(gameState.getP2Card2());
+        centerPanel.setCard(gameState.getCenterCard());
+
+        repaint();
+    }
+
+    private void enableCardListenersForCurrentPlayer() {
+        if (gameState.getCurrentPlayer().getId() == 1) {
+            p1c1Panel.enableClick();
+            p1c2Panel.enableClick();
+
+            p2c1Panel.disableClick();
+            p2c2Panel.disableClick();
+        } else {
+            p2c1Panel.enableClick();
+            p2c2Panel.enableClick();
+
+            p1c1Panel.disableClick();
+            p1c2Panel.disableClick();
+        }
+    }
+
+    private void disableAllCardListeners() {
+        p1c1Panel.disableClick();
+        p1c2Panel.disableClick();
+        p2c1Panel.disableClick();
+        p2c2Panel.disableClick();
     }
 }
