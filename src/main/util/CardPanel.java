@@ -12,6 +12,7 @@ public class CardPanel extends JPanel {
     private Card card;
     private Image cardImage;
     private Boolean selected = false;
+    private boolean rotated = false;   // 🔹 ÚJ: forgatási flag
 
      public CardPanel(Card card, boolean isselected) {
          this.card = card;
@@ -43,6 +44,12 @@ public class CardPanel extends JPanel {
         repaint();
     }
 
+    // 🔹 ÚJ: forgatás beállítása
+    public void setRotated(boolean rotated) {
+        this.rotated = rotated;
+        repaint();
+    }
+
     public void enableClick() {
         for (MouseListener ml : getMouseListeners()) {
             removeMouseListener(ml);
@@ -59,14 +66,24 @@ public class CardPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.drawImage(cardImage, 0, 0, getWidth(), getHeight(), null);
 
-        // Kijelölés keret
+        // 🔹 Kép rajzolása (másolt Graphics2D-vel, hogy a keret ne forogjon)
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        if (rotated) {
+            // a panel közepe körül forgatunk 180°-ot
+            g2.rotate(Math.PI, getWidth() / 2.0, getHeight() / 2.0);
+        }
+
+        g2.drawImage(cardImage, 0, 0, getWidth(), getHeight(), null);
+        g2.dispose();
+
+        // Kijelölés keret (NEM forgatjuk)
         if (selected) {
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setColor(Color.YELLOW);
-            g2.setStroke(new BasicStroke(4f));
-            g2.drawRect(2, 2, getWidth() - 4, getHeight() - 4);
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setColor(Color.YELLOW);
+            g2d.setStroke(new BasicStroke(4f));
+            g2d.drawRect(2, 2, getWidth() - 4, getHeight() - 4);
         }
     }
 }
