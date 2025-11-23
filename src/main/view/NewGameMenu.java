@@ -28,8 +28,7 @@ public class NewGameMenu  extends JFrame {
         backgroundPanel.setLayout(new GridBagLayout());
         setContentPane(backgroundPanel);
 
-        //Escape billentyű működése
-        //new EscapeKeyBinding(this);
+
         backmain.addActionListener(new MainMenuActionListener(this));
         start.addActionListener(new StartGameActionListener(this));
 
@@ -146,6 +145,21 @@ public class NewGameMenu  extends JFrame {
             BoardFrame bf = new BoardFrame(gs);
             bf.setVisible(true);
 
+            ImagePopup.show(
+                    bf,
+                    "/Popup/fight.png",
+                    2000,
+                    1280, 720,
+                    null
+            );
+
+            ImagePopup.show(
+                    bf,
+                    "/Popup/red_turn.png",
+                    2000,
+                    1280, 720,
+                    null
+            );
             frame.dispose();
         }
     }
