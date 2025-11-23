@@ -4,7 +4,8 @@ import game.Card;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.BooleanSupplier;
+import java.awt.event.MouseListener;
+
 
 public class CardPanel extends JPanel {
 
@@ -34,6 +35,25 @@ public class CardPanel extends JPanel {
 
     public Card getCard() {
         return card;
+    }
+
+    public void setCard(Card c) {
+        this.card = c;
+        this.cardImage = new ImageIcon(getClass().getResource(c.getImagepath())).getImage();
+        repaint();
+    }
+
+    public void enableClick() {
+        for (MouseListener ml : getMouseListeners()) {
+            removeMouseListener(ml);
+        }
+        addMouseListener(new CardClickListener(this));
+    }
+
+    public void disableClick() {
+        for (MouseListener ml : getMouseListeners()) {
+            removeMouseListener(ml);
+        }
     }
 
     @Override
