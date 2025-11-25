@@ -208,6 +208,7 @@ public class BoardFrame extends JFrame {
 
     public void handleTileClick(int x, int y) {
 
+
         // A TilePanel példányt onnan kapjuk meg, ahol eltároltuk őket
         TilePanel clicked = tileGrid[y][x];
         Piece piece = gameState.getBoard()[y][x];
@@ -281,6 +282,9 @@ public class BoardFrame extends JFrame {
             selectedCardPanel = null;
 
             updateHighlights();
+
+            // 🔹 ITT hívd az AI-t, ha ő jön
+            maybeTriggerAI();
             return;
         }
 
@@ -298,6 +302,8 @@ public class BoardFrame extends JFrame {
             selectedTile = clicked;
         }
         updateHighlights();
+
+
     }
 
     public void refreshBoard() {
@@ -341,5 +347,69 @@ public class BoardFrame extends JFrame {
         p1c2Panel.disableClick();
         p2c1Panel.disableClick();
         p2c2Panel.disableClick();
+    }
+
+    private void maybeTriggerAI() {
+        // Ha nem AI jön → játékos kattint
+        if (!gameState.getCurrentPlayer().isAI()) {
+            enableCardListenersForCurrentPlayer();
+            return;
+        }
+
+        if (gameState.isGameOver()) return;
+
+        // 🔥 WAIT 2.5 SEC BEFORE AI MOVES
+        Timer thinkTimer = new Timer(2500, e -> {
+
+            // --- AI decides move ---
+            Move aiMove = gameState.getCurrentPlayer().decideMove(gameState);
+
+            if (aiMove != null) {
+                gameState.makeMove(aiMove);
+                refreshBoard();
+                refreshCards();
+            }
+
+            // --- Win check ---
+            if (gameState.isGameOver()) {
+                int w = gameState.getWinner();
+                String img = (w == 1)
+                        ? "/Popup/red_win.png"
+                        : "/Popup/blue_win.png";
+
+                ImagePopup.show(this, img, 2500, 1280, 720, () -> {
+                    dispose();
+                    new MainMenu().setVisible(true);
+                });
+                return;
+            }
+
+            ImagePopup.show(
+                    this,
+                    (gameState.getCurrentPlayer().getId() == 1)
+                            ? "/Popup/red_turn.png"
+                            : "/Popup/blue_turn.png",
+                    1500,
+                    1280, 720,
+                    null
+            );
+
+            // 🔥 ALWAYS update correct card listeners after AI move
+            enableCardListenersForCurrentPlayer();
+
+            // 🔥 Next AI turn (AI vs AI)
+            Timer nextAI = new Timer(500, ev -> maybeTriggerAI());
+            nextAI.setRepeats(false);
+            nextAI.start();
+
+        });
+
+        thinkTimer.setRepeats(false);
+        thinkTimer.start();
+    }
+
+    public void startAIGameAfterPopups() {
+        // PIROS az első → ha AI, induljon azonnal
+        SwingUtilities.invokeLater(this::maybeTriggerAI);
     }
 }

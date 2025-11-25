@@ -158,7 +158,12 @@ public class NewGameMenu  extends JFrame {
                     "/Popup/red_turn.png",
                     2000,
                     1280, 720,
-                    null
+                    () -> {
+                        // 🔥 Popup után indulhat a bot, ha AI vs AI van
+                        if (mode == GameMode.AI_VS_AI) {
+                            bf.startAIGameAfterPopups();
+                        }
+                    }
             );
             frame.dispose();
         }
