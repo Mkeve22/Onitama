@@ -106,12 +106,60 @@ public class AIPlayer implements Player {
         int score = 0;
 
         // 1️⃣ Templom győzelem
-        if (wouldTempleWin(m, state)) return 1000;
+        if (wouldTempleWin(m, state)) return 2000;
 
         // 2️⃣ Master ütés
         if (target != null && target.isMaster() && target.getOwner() != id) {
-            return 200;
+            return 2000;
         }
+
+        // ===== MASTER DEFENSE: ha fenyegetve van, ez a legfontosabb =====
+        if (isMasterThreatened(state)) {
+
+            // 1️⃣ LEHET SIMA BÁBUVAL LEÜTNI A TÁMADÓT?
+            for (int[] pos : getThreateningPositions(state)) {
+
+                // Ez a lépés a támadó mezőre megy?
+                if (m.toX == pos[0] && m.toY == pos[1]) {
+
+                    // Ha MASTER lép → még nem térünk vissza, lehet veszélyes
+                    if (!p.isMaster()) {
+                        return 700; // SIMA bábuval ütni a legjobb!
+                    }
+                }
+            }
+
+
+            // 2️⃣ MASTER ÜTI A TÁMADÓT — csak akkor, ha lépés UTÁN biztonságos
+            for (int[] pos : getThreateningPositions(state)) {
+                if (m.toX == pos[0] && m.toY == pos[1]) {
+
+                    if (p.isMaster()) {
+                        GameState next = cloneAndSimulateMove(state, m);
+
+                        if (!isMasterThreatened(next)) {
+                            return 600;  // jó lépés, masterrel biztonságosan üti
+                        } else {
+                            return -300; // öngyilkos, kerülni kell
+                        }
+                    }
+                }
+            }
+
+
+            // 3️⃣ MASTER MENEKÜL — UTÁNA biztonságos legyen
+            if (p.isMaster()) {
+                GameState next = cloneAndSimulateMove(state, m);
+
+                if (!isMasterThreatened(next)) {
+                    return 500; // menekülés működik
+                }
+            }
+
+            // 4️⃣ Egyéb lépés, ami nem segít → rossz
+            return -500;
+        }
+
 
         // 3️⃣ Sima ütés
         if (target != null && target.getOwner() != id) score += 50;
@@ -120,7 +168,7 @@ public class AIPlayer implements Player {
         if (!keepsPieceSafe(m, state)) score -= 999;
 
         // 5️⃣ Mastert óvni kell
-        if (p.isMaster()) score -= 5;   // master mozgatása veszélyesebb
+        if (p.isMaster()) score -= 2;   // master mozgatása veszélyesebb
 
         // 6️⃣ Pozíció javítás (középpont felé)
         score += centerScore(m.toX, m.toY);
@@ -206,5 +254,135 @@ public class AIPlayer implements Player {
         if (p.getOwner() == 2 && m.toX == 2 && m.toY == 4) return true;
 
         return false;
+    }
+
+    private boolean isMasterThreatened(GameState state) {
+
+        Piece[][] board = state.getBoard();
+
+        // Master pozíciója megkeresése
+        int mx = -1, my = -1;
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                Piece p = board[y][x];
+                if (p != null && p.isMaster() && p.getOwner() == id) {
+                    mx = x;
+                    my = y;
+                }
+            }
+        }
+
+        if (mx == -1) return false;
+
+        int enemy = (id == 1 ? 2 : 1);
+        Card ec1 = (enemy == 1 ? state.getP1Card1() : state.getP2Card1());
+        Card ec2 = (enemy == 1 ? state.getP1Card2() : state.getP2Card2());
+
+        for (Card c : new Card[]{ec1, ec2}) {
+            for (int[] mv : c.getMoves()) {
+
+                int dx = mv[0];
+                int dy = mv[1];
+
+                // ellenfél irányát normalizáljuk
+                if (enemy == 1) dy = -dy;
+                else dx = -dx;
+
+                int ex = mx - dx;
+                int ey = my - dy;
+
+                if (ex < 0 || ex > 4 || ey < 0 || ey > 4) continue;
+
+                Piece attacker = board[ey][ex];
+
+                if (attacker != null && attacker.getOwner() == enemy) {
+                    return true; // TALÁLT FENYEGETÉS
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private List<int[]> getThreateningPositions(GameState state) {
+
+        List<int[]> threats = new ArrayList<>();
+        Piece[][] board = state.getBoard();
+
+        // Master pozíció
+        int mx = -1, my = -1;
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                Piece p = board[y][x];
+                if (p != null && p.isMaster() && p.getOwner() == id) {
+                    mx = x;
+                    my = y;
+                }
+            }
+        }
+
+        int enemy = (id == 1 ? 2 : 1);
+        Card ec1 = (enemy == 1 ? state.getP1Card1() : state.getP2Card1());
+        Card ec2 = (enemy == 1 ? state.getP1Card2() : state.getP2Card2());
+
+        for (Card c : new Card[]{ec1, ec2}) {
+            for (int[] mv : c.getMoves()) {
+
+                int dx = mv[0];
+                int dy = mv[1];
+
+                if (enemy == 1) dy = -dy;
+                else dx = -dx;
+
+                int ex = mx - dx;
+                int ey = my - dy;
+
+                if (ex < 0 || ex > 4 || ey < 0 || ey > 4) continue;
+
+                Piece attacker = board[ey][ex];
+                if (attacker != null && attacker.getOwner() == enemy) {
+                    threats.add(new int[]{ex, ey});
+                }
+            }
+        }
+        return threats;
+    }
+
+    private GameState cloneAndSimulateMove(GameState state, Move move) {
+
+        // 1. Új GameState objektum létrehozása, ugyanazzal a mode-dal
+        GameState copy = new GameState(
+                state.getPlayer1(),
+                state.getPlayer2(),
+                state.getMode(),
+                state.getLibrary()
+        );
+
+        // 2. Tábla másolása
+        Piece[][] newBoard = new Piece[5][5];
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                Piece p = state.getBoard()[y][x];
+                if (p != null) newBoard[y][x] = new Piece(p.getOwner(), p.isMaster());
+            }
+        }
+        copy.setBoard(newBoard);
+
+        // 3. Kártyák másolása
+        copy.setP1Cards(state.getP1Card1(), state.getP1Card2());
+        copy.setP2Cards(state.getP2Card1(), state.getP2Card2());
+        copy.setCenterCard(state.getCenterCard());
+
+        // 4. Current player másolása
+        copy.setCurrentPlayer(state.getCurrentPlayer());
+
+        // 6. Lépés szimulálása
+        copy.makeMove(new Move(
+                move.fromX, move.fromY,
+                move.toX, move.toY,
+                move.card
+        ));
+
+        return copy;
     }
 }

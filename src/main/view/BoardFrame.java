@@ -21,6 +21,10 @@ public class BoardFrame extends JFrame {
 
     private CardPanel centerPanel;
 
+    private Timer aiThinkTimer = null;
+    private Timer aiNextTimer = null;
+
+
     public BoardFrame(GameState gameState) {
         this.gameState = gameState;
         setTitle("Onitama");
@@ -103,6 +107,10 @@ public class BoardFrame extends JFrame {
 
         JButton saveButton = new ImageButton("/BoardFrame/save_button.png", "/BoardFrame/save_button_press.png", 272, 100);
         JButton exitButton = new ImageButton("/BoardFrame/saveexit_button.png", "/BoardFrame/saveexit_button_press.png", 272, 100);
+
+        saveButton.addActionListener(e -> showSaveDialog());
+        exitButton.addActionListener(e -> showExitSaveDialog());
+
 
         buttonsColumn.add(saveButton);
         buttonsColumn.add(exitButton);
@@ -306,7 +314,7 @@ public class BoardFrame extends JFrame {
 
     }
 
-    public void refreshBoard() {
+    private void refreshBoard() {
         for (int y = 0; y < 5; y++) {
             for (int x = 0; x < 5; x++) {
                 tileGrid[y][x].updatePiece();
@@ -315,7 +323,7 @@ public class BoardFrame extends JFrame {
         repaint();
     }
 
-    public void refreshCards() {
+    private void refreshCards() {
         p1c1Panel.setCard(gameState.getP1Card1());
         p1c2Panel.setCard(gameState.getP1Card2());
         p2c1Panel.setCard(gameState.getP2Card1());
@@ -354,12 +362,14 @@ public class BoardFrame extends JFrame {
         if (!gameState.getCurrentPlayer().isAI()) {
             enableCardListenersForCurrentPlayer();
             return;
+        } else {
+            disableAllCardListeners();
         }
 
         if (gameState.isGameOver()) return;
 
         // 🔥 WAIT 2.5 SEC BEFORE AI MOVES
-        Timer thinkTimer = new Timer(2500, e -> {
+        aiThinkTimer = new Timer(2500, e -> {
 
             // --- AI decides move ---
             Move aiMove = gameState.getCurrentPlayer().decideMove(gameState);
@@ -398,18 +408,99 @@ public class BoardFrame extends JFrame {
             enableCardListenersForCurrentPlayer();
 
             // 🔥 Next AI turn (AI vs AI)
-            Timer nextAI = new Timer(500, ev -> maybeTriggerAI());
-            nextAI.setRepeats(false);
-            nextAI.start();
+            aiNextTimer = new Timer(500, ev -> maybeTriggerAI());
+            aiNextTimer.setRepeats(false);
+            aiNextTimer.start();
 
         });
 
-        thinkTimer.setRepeats(false);
-        thinkTimer.start();
+        aiThinkTimer.setRepeats(false);
+        aiThinkTimer.start();
     }
 
     public void startAIGameAfterPopups() {
         // PIROS az első → ha AI, induljon azonnal
         SwingUtilities.invokeLater(this::maybeTriggerAI);
+    }
+
+    private void showSaveDialog() {
+        stopAITimers();
+        Object[] options = {"Save Slot 1", "Save Slot 2", "Cancel"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "Choose a slot to save the game:",
+                "Save Game",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (choice == JOptionPane.YES_OPTION) {
+            saveGameToSlot(1);
+        } else if (choice == JOptionPane.NO_OPTION) {
+            saveGameToSlot(2);
+        }
+
+        maybeTriggerAI();
+    }
+
+    private void saveGameToSlot(int slot) {
+        try {
+            filemanagement.SaveLoadManager.save(gameState, slot);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Game saved successfully to Slot " + slot + "!",
+                    "Saved",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error saving game:\n" + ex.getMessage(),
+                    "Save Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void showExitSaveDialog() {
+        stopAITimers();
+        Object[] options = {"Save to Slot 1", "Save to Slot 2", "Cancel"};
+        int choice = JOptionPane.showOptionDialog(
+                this,
+                "Save your game before exiting?",
+                "Exit Game",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                options,
+                options[0]
+        );
+
+        if (choice == JOptionPane.YES_OPTION) {
+            saveGameToSlot(1);
+            dispose();
+            new MainMenu().setVisible(true);
+        } else if (choice == JOptionPane.NO_OPTION) {
+            saveGameToSlot(2);
+            dispose();
+            new MainMenu().setVisible(true);
+        }
+    }
+
+    private void stopAITimers() {
+        if (aiThinkTimer != null) {
+            aiThinkTimer.stop();
+            aiThinkTimer = null;
+        }
+        if (aiNextTimer != null) {
+            aiNextTimer.stop();
+            aiNextTimer = null;
+        }
     }
 }

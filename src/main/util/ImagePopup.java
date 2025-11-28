@@ -21,6 +21,7 @@ public class ImagePopup {
         dialog.setLayout(new BorderLayout());
 
         JLabel label = new JLabel(icon);
+        label.setOpaque(false);
         dialog.add(label, BorderLayout.CENTER);
 
         dialog.pack();

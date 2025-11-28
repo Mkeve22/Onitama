@@ -23,16 +23,18 @@ public class GameState {
     private GameMode mode;
 
     private Integer winner = null;  // 1 vagy 2, ha már van győztes
+    private int library;
 
 
-    public GameState(Player p1, Player p2, GameMode mode) {
+    public GameState(Player p1, Player p2, GameMode mode, int library) {
         this.player1 = p1;
         this.player2 = p2;
         this.currentPlayer = player1;
         this.mode = mode;
+        this.library = library;
 
         initBoard();
-        initDeck();
+        initDeck(library);
     }
 
     public GameMode getMode() { return mode; }
@@ -43,6 +45,18 @@ public class GameState {
 
     public boolean isGameOver() {
         return winner != null;
+    }
+
+    public Player getPlayer1() {
+        return player1;
+    }
+
+    public Player getPlayer2() {
+        return player2;
+    }
+
+    public int getLibrary() {
+        return library;
     }
 
 
@@ -67,8 +81,12 @@ public class GameState {
         board[0][4] = new Piece(2, false);
     }
 
-    private void initDeck() {
-        deck = new DeckManager(new BaseCardLibrary());
+    private void initDeck(int library) {
+        if (library == 0) {
+            deck = new DeckManager(new BaseCardLibrary());
+        } else {
+            deck = new DeckManager(new SenseiPathCardLibrary());
+        }
         deck.dealcard();
 
         p1Card1 = deck.getPlayer1Cards().get(0);
@@ -168,6 +186,37 @@ public class GameState {
 
     private void switchPlayer() {
         currentPlayer = (currentPlayer == player1 ? player2 : player1);
+    }
+
+
+    // =======================
+// SETTEREK SAVE/LOAD-hoz
+// =======================
+
+    public void setBoard(Piece[][] newBoard) {
+        this.board = newBoard;
+    }
+
+    public void setCurrentPlayer(Player p) {
+        this.currentPlayer = p;
+    }
+
+    public void setP1Cards(Card c1, Card c2) {
+        this.p1Card1 = c1;
+        this.p1Card2 = c2;
+    }
+
+    public void setP2Cards(Card c1, Card c2) {
+        this.p2Card1 = c1;
+        this.p2Card2 = c2;
+    }
+
+    public void setCenterCard(Card c) {
+        this.centerCard = c;
+    }
+
+    public void setGameMode(GameMode mode) {
+        this.mode = mode;
     }
 
 

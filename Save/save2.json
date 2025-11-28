@@ -1,0 +1,11 @@
+{
+"currentPlayerId":1,
+"board":[[{"player":2,"master":false},{"player":2,"master":false},{"player":2,"master":true},{"player":2,"master":false},{"player":2,"master":false}],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[{"player":1,"master":false},{"player":1,"master":false},{"player":1,"master":true},{"player":1,"master":false},{"player":1,"master":false}]],
+"p1c1":"Eel",
+"p1c2":"Ox",
+"p2c1":"Elephant",
+"p2c2":"Monkey",
+"centerCard":"Crane",
+"gamemod":"PLAYER_VS_PLAYER",
+"library":0
+}
