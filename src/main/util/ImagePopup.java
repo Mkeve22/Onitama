@@ -4,9 +4,23 @@ package util;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Egy felugró, keret nélküli ablakot jelenít meg,
+ * amelyben egy kép látható egy meghatározott ideig.
+ */
 public class ImagePopup {
 
-
+    /**
+     * Megjelenít egy időzített, keret nélküli képes popup ablakot.
+     *
+     * @param parent         A szülő ablak (ennek közepére igazodik a popup).
+     * @param imgPath        A megjelenítendő kép elérési útja (resource path).
+     * @param displayMillis  A megjelenítés időtartama milliszekundumban.
+     * @param width          A kép és a popup kívánt szélessége.
+     * @param height         A kép és a popup kívánt magassága.
+     * @param afterClose     Opcionális callback, amely a bezárás után fut le
+     *                       (lehet null), ilyen esetben semmi sem történik.
+     */
     public static void show(JFrame parent, String imgPath, int displayMillis, int width, int height, Runnable afterClose) {
 
         // kép betöltése
@@ -21,6 +35,7 @@ public class ImagePopup {
         dialog.setLayout(new BorderLayout());
 
         JLabel label = new JLabel(icon);
+        label.setOpaque(false);
         dialog.add(label, BorderLayout.CENTER);
 
         dialog.pack();

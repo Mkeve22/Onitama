@@ -5,14 +5,28 @@ import javax.swing.*;
 import java.awt.*;
 import view.*;
 
+
+/**
+ * A játéktábla egyik mezőjét megjelenítő panel.
+ *
+ * A TilePanel feladatai:
+ * - tárolja a mező x és y koordinátáját,
+ * - kirajzolja a rajta lévő bábut,
+ * - megjeleníti a kijelölést (sárga keret),
+ * - megjeleníti a lehetséges lépést (zöld háttér),
+ * - speciális mezőszínezést alkalmaz a trón mezőkre,
+ * - a kattintásokat továbbítja a vezérlő felé.
+ *
+ * A panel átlátszó háttérrel rendelkezik.
+ */
 public class TilePanel extends JPanel {
 
     private final int x;
     private final int y;
     private final GameState state;
     private boolean selected = false;
-    // 🔥 MOD – új flag a zöld kiemeléshez
-    private boolean highlighted = false;            // <-- MOD
+
+    private boolean highlighted = false;
 
 
     private static final Image redMaster   = new ImageIcon(TilePanel.class.getResource("/Piece/red_master.png")).getImage();
@@ -20,24 +34,15 @@ public class TilePanel extends JPanel {
     private static final Image blueMaster  = new ImageIcon(TilePanel.class.getResource("/Piece/blue_master.png")).getImage();
     private static final Image blueStudent = new ImageIcon(TilePanel.class.getResource("/Piece/blue_student.png")).getImage();
 
-
-    // 🔥 MOD – setter/getter
-    public void setHighlighted(boolean h) {         // <-- MOD
-        this.highlighted = h;
-        repaint();
-    }
-
-    public void updatePiece() {
-        // Ha később lesz saját lokális állapot, itt tudod frissíteni.
-        repaint();
-    }
-
-    public boolean isHighlighted() {                // <-- MOD
-        return highlighted;
-    }
-
-
-
+    /**
+     * Konstruktor
+     * Létrehozza a TilePanelt
+     *
+     * @param x          a mező oszlopa
+     * @param y          a mező sora
+     * @param state      a játék állapota
+     * @param controller az a vezérlő, amelyhez a kattintási eseményeket továbbítjuk
+     */
     public TilePanel(int x, int y, GameState state, BoardFrame controller) {
         this.x = x;
         this.y = y;
@@ -48,21 +53,58 @@ public class TilePanel extends JPanel {
         addMouseListener(new TileClickListener(x, y, controller));
     }
 
+
+    /**
+     * A mező lehetséges lépési célpontként való megjelölése.
+     *
+     * @param h - igaz, ha a mező zölden ki legyen emelve
+     */
+    public void setHighlighted(boolean h) {
+        this.highlighted = h;
+        repaint();
+    }
+
+    /**
+     * A mezőn lévő bábu frissítése és újrarajzolása.
+     */
+    public void updatePiece() {
+        repaint();
+    }
+
+    /**
+     * Visszaadja, hogy a mező zölden ki van-e emelve.
+     *
+     * @return igaz, ha a mező highlight állapotban van
+     */
+    public boolean isHighlighted() {
+        return highlighted;
+    }
+
+    /**
+     * Beállítja, hogy a mező ki van-e jelölve.
+     *
+     * @param selected igaz, ha a mező sárga keretet kap
+     */
     public void setSelected(boolean selected) {
         this.selected = selected;
         repaint();
     }
 
-    public boolean isSelected() {
-        return selected;
-    }
 
-
+    /**
+     * A mező teljes grafikus megjelenítéséért felel:
+     * - király mezők színezése (felső kék, alsó piros),
+     * - bábu kirajzolása,
+     * - zöld kiemelés lehetséges lépéshez,
+     * - fehér vagy sárga keret rajzolása.
+     *
+     * @param g the <code>Graphics</code> object to protect
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // 1) KIRÁLY MEZŐ SZÍNEZÉS
+        // KIRÁLY MEZŐ SZÍNEZÉS
         if (x == 2 && y == 0) {
             g.setColor(new Color(40, 90, 200, 180)); // kék
             g.fillRect(0, 0, getWidth(), getHeight());
@@ -73,7 +115,7 @@ public class TilePanel extends JPanel {
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // 2) BÁBU KIRAJZOLÁSA
+        // BÁBU KIRAJZOLÁSA
         Piece p = state.getBoard()[y][x];
 
         if (p != null) {
@@ -90,13 +132,13 @@ public class TilePanel extends JPanel {
                     null);
         }
 
-        //ha lehetséges lépés → zöld háttér
+        // Ha lehetséges lépés zöld háttér
         if (highlighted) {
             g.setColor(new Color(0, 255, 0, 120));
             g.fillRect(0, 0, getWidth(), getHeight());
         }
 
-        // 3) KERET FEHÉR
+        // KERET FEHÉR
         Graphics2D g2 = (Graphics2D) g;
 
         if (selected) {
@@ -110,7 +152,13 @@ public class TilePanel extends JPanel {
         g2.drawRect(1, 1, getWidth() - 3, getHeight() - 3);
     }
 
-    public int getXCoord() { return x; }
+    /**
+     * @return - a mező x koordinátája
+     */
     public int getTileX() { return x; }
+
+    /**
+     * @return - a mező y koordinátája
+     */
     public int getTileY() { return y; }
 }
