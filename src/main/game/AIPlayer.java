@@ -4,26 +4,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
+/**
+ * Gépi játékos mely előre megírt szabályok alapján válaasztja ki a lépését
+ */
 public class AIPlayer implements Player {
 
     private final int id;
     private final Random rnd = new Random();
 
+    /**
+     * Konstruktor
+     * @param id
+     */
     public AIPlayer(int id) {
         this.id = id;
     }
 
+    /**
+     * @return - az id-t adja vissza
+     */
     @Override
     public int getId() {
         return id;
     }
 
+    /**
+     *
+     * @return Ai esetén true amugy false
+     */
     @Override
     public boolean isAI() {
         return true;
     }
 
+    /**
+     * Ez a függvény kiválasztja hogy a gép mit lépjen,
+     * megszabott feltételek alapján
+     *
+     * @param state - aktuális játéktér
+     * @return visszaadja a gép által kiválasztott lépést
+     */
     @Override
     public Move decideMove(GameState state) {
 
@@ -35,7 +55,7 @@ public class AIPlayer implements Player {
 
         List<Move> allMoves = new ArrayList<>();
 
-        // BÁBUK BEGYŰJTÉSE
+        // LÉPÉSEL BEGYŰJTÉSE
         for (int y = 0; y < 5; y++) {
             for (int x = 0; x < 5; x++) {
                 Piece p = board[y][x];
@@ -48,9 +68,9 @@ public class AIPlayer implements Player {
 
         if (allMoves.isEmpty()) return null;
 
-        // ➤ OKOSÍTOTT AI: minden lépést pontozunk
+        // Kiválasztja a legjobb lépést: elöször minden lépést pontoz
         Move bestMove = null;
-        int bestScore = -1000;
+        int bestScore = Integer.MIN_VALUE;
 
         for (Move m : allMoves) {
             int score = evaluateMove(m, state);
@@ -65,8 +85,24 @@ public class AIPlayer implements Player {
     }
 
 
-    // ------ MOVE GENERATION --------------------------------------------------
-
+    /**
+     * Legenerálja egy adott bábu összes lehetséges lépését
+     * a kapott kártya alapján.
+     *
+     * A metódus figyelembe veszi:
+     * - a kártya mozgásait,
+     * - a játékos irányát,
+     * - a tábla határait,
+     * - hogy saját bábut nem léphet le,
+     * - hogy az ellenfél bábu üthető.
+     *
+     * @param x        a bábu jelenlegi x koordinátája
+     * @param y        a bábu jelenlegi y koordinátája
+     * @param piece    maga a bábu
+     * @param card     a mozgást meghatározó kártya
+     * @param state    a játék aktuális állapota
+     * @return a bábuval tehető lépések listája
+     */
     private List<Move> generateMovesForPiece(int x, int y, Piece piece, Card card, GameState state) {
 
         List<Move> result = new ArrayList<>();
@@ -95,8 +131,23 @@ public class AIPlayer implements Player {
         return result;
     }
 
-    // ------ SCORING / EVALUATION --------------------------------------------
-
+    /**
+     * Pontozza az adott lépést és visszaadja annak értékét.
+     *
+     * A pontozás figyelembe veszi többek között:
+     * - templom győzelem lehetőségét,
+     * - ellenfél master leütését,
+     * - a saját master fenyegetettségét,
+     * - bábu biztonságban marad-e,
+     * - pozíció előnyöket,
+     * - célpont ütését,
+     * - az ellenfél master felé közeledést,
+     * - véletlen kis pont hozzáadását a kevésbé kiszámítható AI érdekében.
+     *
+     * @param m      a vizsgált lépés
+     * @param state  a játék aktuális állapota
+     * @return a lépés pontszáma, minél nagyobb, annál jobb
+     */
     private int evaluateMove(Move m, GameState state) {
 
         Piece[][] board = state.getBoard();
@@ -105,24 +156,24 @@ public class AIPlayer implements Player {
 
         int score = 0;
 
-        // 1️⃣ Templom győzelem
+        // Templom győzelem
         if (wouldTempleWin(m, state)) return 2000;
 
-        // 2️⃣ Master ütés
+        // Master ütés
         if (target != null && target.isMaster() && target.getOwner() != id) {
             return 2000;
         }
 
-        // ===== MASTER DEFENSE: ha fenyegetve van, ez a legfontosabb =====
+        // Master védelme
         if (isMasterThreatened(state)) {
 
-            // 1️⃣ LEHET SIMA BÁBUVAL LEÜTNI A TÁMADÓT?
+            // LEHET SIMA BÁBUVAL LEÜTNI A TÁMADÓT
             for (int[] pos : getThreateningPositions(state)) {
 
                 // Ez a lépés a támadó mezőre megy?
                 if (m.toX == pos[0] && m.toY == pos[1]) {
 
-                    // Ha MASTER lép → még nem térünk vissza, lehet veszélyes
+                    // Ha MASTER lép még nem térünk vissza, lehet veszélyes
                     if (!p.isMaster()) {
                         return 700; // SIMA bábuval ütni a legjobb!
                     }
@@ -130,7 +181,7 @@ public class AIPlayer implements Player {
             }
 
 
-            // 2️⃣ MASTER ÜTI A TÁMADÓT — csak akkor, ha lépés UTÁN biztonságos
+            // MASTER ÜTI A TÁMADÓT — csak akkor, ha lépés UTÁN biztonságos
             for (int[] pos : getThreateningPositions(state)) {
                 if (m.toX == pos[0] && m.toY == pos[1]) {
 
@@ -147,7 +198,7 @@ public class AIPlayer implements Player {
             }
 
 
-            // 3️⃣ MASTER MENEKÜL — UTÁNA biztonságos legyen
+            // MASTER MENEKÜL — UTÁNA biztonságos legyen
             if (p.isMaster()) {
                 GameState next = cloneAndSimulateMove(state, m);
 
@@ -156,33 +207,41 @@ public class AIPlayer implements Player {
                 }
             }
 
-            // 4️⃣ Egyéb lépés, ami nem segít → rossz
+            // Egyéb lépés, ami nem segít → rossz
             return -500;
         }
 
 
-        // 3️⃣ Sima ütés
+        // Sima ütés
         if (target != null && target.getOwner() != id) score += 50;
 
-        // 4️⃣ Kerülje saját halálát
+        // Kerülje saját halálát
         if (!keepsPieceSafe(m, state)) score -= 999;
 
-        // 5️⃣ Mastert óvni kell
+        // Mastert óvni kell
         if (p.isMaster()) score -= 2;   // master mozgatása veszélyesebb
 
-        // 6️⃣ Pozíció javítás (középpont felé)
+        // Pozíció javítás (középpont felé)
         score += centerScore(m.toX, m.toY);
 
-        // 7️⃣ Közeledés az ellenfél masterhez
+        // Közeledés az ellenfél masterhez
         score += approachEnemyMaster(m, state);
 
-        // 8️⃣ Random kis zaj → hogy ne legyen mindig teljesen kiszámítható
+        // Random kis pont hogy ne legyen mindig teljesen kiszámítható
         score += rnd.nextInt(5);
 
         return score;
     }
 
-    // Középpont preferálása
+    /**
+     * A tábla középpontjához való közelség alapján ad pontot.
+     * Minél közelebb kerül a bábu a tábla középpontjához (2,2),
+     * annál magasabb pontszámot kap.
+     *
+     * @param x a célmező x koordinátája
+     * @param y a célmező y koordinátája
+     * @return a középponthoz való közelség pontszáma
+     */
     private int centerScore(int x, int y) {
         int cx = 2, cy = 2;
         int dx = Math.abs(cx - x);
@@ -190,6 +249,14 @@ public class AIPlayer implements Player {
         return 10 - (dx + dy); // minél közelebb a középhez, annál jobb
     }
 
+    /**
+     * A lépést pontozza annak alapján, hogy a bábu közeledik-e
+     * az ellenfél master figurájához.
+     *
+     * @param m      a vizsgált lépés
+     * @param state  a játék aktuális állapota
+     * @return pontszám, amely nagyobb, ha a lépés közelebb visz az ellenfél masterhez
+     */
     private int approachEnemyMaster(Move m, GameState state) {
         int enemy = (id == 1 ? 2 : 1);
 
@@ -207,8 +274,19 @@ public class AIPlayer implements Player {
         return 0;
     }
 
-    // ------ SAFETY CHECK -----------------------------------------------------
 
+    /**
+     * Megvizsgálja, hogy a lépés után a bábu biztonságban marad-e.
+     *
+     * A metódus megnézi:
+     * - az ellenfél összes kártyáját,
+     * - az ellenfél összes potenciális lépését,
+     * - hogy bármelyik lépés az adott mezőre tud-e érkezni.
+     *
+     * @param m      a lépés
+     * @param state  a játék aktuális állapota
+     * @return igaz, ha a lépés után a bábu nem üthető le azonnal
+     */
     private boolean keepsPieceSafe(Move m, GameState state) {
 
         Piece[][] board = state.getBoard();
@@ -243,6 +321,15 @@ public class AIPlayer implements Player {
         return true;
     }
 
+    /**
+     * Eldönti, hogy a lépés templom győzelmet eredményez-e.
+     * A templom győzelem akkor következik be, amikor a master
+     * eljut az ellenfél templommezőjére.
+     *
+     * @param m      a lépés
+     * @param state  a játék aktuális állapota
+     * @return igaz, ha a lépés templom győzelmet hoz
+     */
     private boolean wouldTempleWin(Move m, GameState state) {
 
         Piece[][] board = state.getBoard();
@@ -256,6 +343,18 @@ public class AIPlayer implements Player {
         return false;
     }
 
+
+    /**
+     * Megvizsgálja, hogy az Gép saját master figurája
+     * éppen fenyegetve van-e az ellenfél kártyái alapján.
+     *
+     * Megkeresi a master pozícióját, majd megnézi,
+     * hogy bármelyik ellenfél bábu képes-e eljutni oda
+     * a következő lépésben.
+     *
+     * @param state a játék aktuális állapota
+     * @return igaz, ha a master fenyegetve van
+     */
     private boolean isMasterThreatened(GameState state) {
 
         Piece[][] board = state.getBoard();
@@ -304,6 +403,13 @@ public class AIPlayer implements Player {
         return false;
     }
 
+    /**
+     * Visszaadja azon mezők listáját, ahonnan az ellenfél
+     * a következő lépésben le tudja ütni az Gép masterét.
+     *
+     * @param state a játék aktuális állapota
+     * @return lista minden olyan mező koordinátájával, ahol a fenyegető ellenfél bábu áll
+     */
     private List<int[]> getThreateningPositions(GameState state) {
 
         List<int[]> threats = new ArrayList<>();
@@ -348,9 +454,29 @@ public class AIPlayer implements Player {
         return threats;
     }
 
+
+    /**
+     * Létrehoz egy másolatot a játékállapotról, majd azon
+     * végrehajtja a megadott lépést.
+     *
+     * Ezt a Gép arra használja, hogy megvizsgálja:
+     * - egy lépés után fenyegetésbe kerül-e a master,
+     * - egy lépés biztonságos-e vagy öngyilkos jellegű,
+     * - milyen a tábla jövőbeni állapota a lépés után.
+     *
+     * A másolat tartalmazza:
+     * - a táblát,
+     * - a bábukat,
+     * - a kártyákat,
+     * - az aktuális játékos beállításait.
+     *
+     * @param state az eredeti játékállapot
+     * @param move  a szimulálandó lépés
+     * @return a lépés végrehajtása utáni új játékállapot
+     */
     private GameState cloneAndSimulateMove(GameState state, Move move) {
 
-        // 1. Új GameState objektum létrehozása, ugyanazzal a mode-dal
+        // Új GameState objektum létrehozása, ugyanazzal a mode-dal
         GameState copy = new GameState(
                 state.getPlayer1(),
                 state.getPlayer2(),
@@ -358,7 +484,7 @@ public class AIPlayer implements Player {
                 state.getLibrary()
         );
 
-        // 2. Tábla másolása
+        // Tábla másolása
         Piece[][] newBoard = new Piece[5][5];
         for (int y = 0; y < 5; y++) {
             for (int x = 0; x < 5; x++) {
@@ -368,15 +494,15 @@ public class AIPlayer implements Player {
         }
         copy.setBoard(newBoard);
 
-        // 3. Kártyák másolása
+        // Kártyák másolása
         copy.setP1Cards(state.getP1Card1(), state.getP1Card2());
         copy.setP2Cards(state.getP2Card1(), state.getP2Card2());
         copy.setCenterCard(state.getCenterCard());
 
-        // 4. Current player másolása
+        // Current player másolása
         copy.setCurrentPlayer(state.getCurrentPlayer());
 
-        // 6. Lépés szimulálása
+        // Lépés szimulálása
         copy.makeMove(new Move(
                 move.fromX, move.fromY,
                 move.toX, move.toY,

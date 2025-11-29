@@ -6,25 +6,42 @@ import util.*;
 import javax.swing.*;
 import java.awt.*;
 
+
+/**
+ * BoardFrame
+ * A Játéktér kinézetéért felel valamint a kártyák kilyelöléséért,
+ * mezők kijelöléséért,
+ * és a körök egymás utáni vezényléséért amik szorosan függenek a játéktér aktuális állapotától
+ * amit a BoardFrame kezel és jelenít meg
+ * Két gomb található:
+ * - SAVE: elmenti a játékot és ott folytatódik ahol elmentették
+ * - SAVE AND EXIT: stintén elmenti a játékot, de kilép a főképernyőre
+ */
 public class BoardFrame extends JFrame {
 
     private CardPanel selectedCardPanel = null;
-    private GameState gameState;
     private TilePanel selectedTile = null;
+
+    private GameState gameState;
     private TilePanel[][] tileGrid = new TilePanel[5][5];
 
     private CardPanel p2c1Panel;
     private CardPanel p2c2Panel;
-
     private CardPanel p1c1Panel;
     private CardPanel p1c2Panel;
-
     private CardPanel centerPanel;
 
     private Timer aiThinkTimer = null;
     private Timer aiNextTimer = null;
 
 
+    /**
+     * Konstruktor
+     *
+     * Létrehozza a pálya kinézetét elhelyezi a paneleket és a gombokat a megfelelő helyre,
+     * valamint a gombokhoz és panelekhez hozzáadja a funkcióikat
+     * @param gameState A játék aktuális állását tartalmazó osztály
+     */
     public BoardFrame(GameState gameState) {
         this.gameState = gameState;
         setTitle("Onitama");
@@ -38,10 +55,6 @@ public class BoardFrame extends JFrame {
         backgroundPanel.setLayout(new BorderLayout());
         setContentPane(backgroundPanel);
 
-
-
-
-
         //FELSŐ 2 KÁRTYAHELY
         JPanel topCards = new JPanel();
         topCards.setOpaque(false);
@@ -52,12 +65,12 @@ public class BoardFrame extends JFrame {
 
         backgroundPanel.add(topCards, BorderLayout.NORTH);
         p2c1Panel = new CardPanel(gameState.getP2Card1(), true);
-        p2c1Panel.setRotated(true); // 🔹 FELSŐ KÁRTYA FORGATÁSA
+        p2c1Panel.setRotated(true);
         p2c1Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p2c1Panel));
         topCards.add(p2c1Panel);
 
         p2c2Panel = new CardPanel(gameState.getP2Card2(), true);
-        p2c2Panel.setRotated(true); // 🔹 FELSŐ KÁRTYA FORGATÁSA
+        p2c2Panel.setRotated(true);
         p2c2Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p2c2Panel));
         topCards.add(p2c2Panel);
 
@@ -71,7 +84,6 @@ public class BoardFrame extends JFrame {
         bottomCards.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
 
         backgroundPanel.add(bottomCards, BorderLayout.SOUTH);
-
         p1c1Panel = new CardPanel(gameState.getP1Card1(), true);
         p1c1Panel.addPropertyChangeListener("selected", evt -> handleCardSelection(p1c1Panel));
         bottomCards.add(p1c1Panel);
@@ -108,6 +120,7 @@ public class BoardFrame extends JFrame {
         JButton saveButton = new ImageButton("/BoardFrame/save_button.png", "/BoardFrame/save_button_press.png", 272, 100);
         JButton exitButton = new ImageButton("/BoardFrame/saveexit_button.png", "/BoardFrame/saveexit_button_press.png", 272, 100);
 
+        // ActionListenerek hozzáadása
         saveButton.addActionListener(e -> showSaveDialog());
         exitButton.addActionListener(e -> showExitSaveDialog());
 
@@ -124,12 +137,9 @@ public class BoardFrame extends JFrame {
         JPanel centerBoard = new JPanel(new GridLayout(5, 5, 5, 5));
         centerBoard.setOpaque(false);
         centerBoard.setPreferredSize(new Dimension(550, 550));
+        center.add(centerBoard);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        center.add(centerBoard, gbc);
-
+        // Tábla mezőinek létrehozása
         for (int row = 0; row < 5; row++) {
             for (int col = 0; col < 5; col++) {
                 TilePanel tile = new TilePanel(col, row, gameState, this);
@@ -138,11 +148,14 @@ public class BoardFrame extends JFrame {
             }
         }
 
+        // Megfelelő kártyák listenereinek engedélyezése - Egyik játékos ne férjen hozzá a másik lapjaihoz
         disableAllCardListeners();
         enableCardListenersForCurrentPlayer();
-
     }
 
+    /**
+     * Ez zöldre szinezi azokat a mezőket amik egy adott kártyával és bábuval lehetségesen léphetők
+     */
     private void updateHighlights() {
         // Minden mezőről töröljük a zöld kiemelést
         for (int r = 0; r < 5; r++) {
@@ -156,22 +169,28 @@ public class BoardFrame extends JFrame {
             return;
         }
 
+        // Kiválasztott mező és kártya kkinyerése
         Card card = selectedCardPanel.getCard();
         Piece piece = gameState.getBoard()[selectedTile.getTileY()][selectedTile.getTileX()];
 
+        // Nincs bábu a kijelölt mezőn
         if (piece == null) {
-            return;                 // nincs bábu a kijelölt mezőn
+            return;
         }
+
+        // Bábu tulajdonosa
         int owner = piece.getOwner();
 
+        // Mező koordinátája
         int fromX = selectedTile.getTileX();
         int fromY = selectedTile.getTileY();
 
+        // Végigmegyunk a kártya összes lépésén
         for (int[] m : card.getMoves()) {
             int dx = m[0];
             int dy = m[1];
 
-            // fontos: irány függő
+            // Irány függő az irány az aktuális játékostól függ
             if (owner == 1) {
                 dy = -dy;
             }
@@ -179,6 +198,7 @@ public class BoardFrame extends JFrame {
                 dx = -dx;
             }
 
+            // Lépés végrehajtásával melyik mezőre jutnánk
             int tx = fromX + dx;
             int ty = fromY + dy;
 
@@ -187,16 +207,21 @@ public class BoardFrame extends JFrame {
                 continue;
             }
 
-            // saját bábut nem léphet le
+            // Saját bábut nem léphet le
             Piece target = gameState.getBoard()[ty][tx];
             if (target != null && target.getOwner() == owner) {
                 continue;
             }
 
+            // Ha minden ellenörzés helyes akkor a mezőt kiszinezettre módosítjuk
             tileGrid[ty][tx].setHighlighted(true);
         }
     }
 
+    /**
+     * Ez a fügvénya kártyák kijelölését kezeli (Sárga keret) és meghivja az updateHighlights függvényt a végén
+     * @param clicked Az a kártya amire éppen ráklikkelt a felhasználó
+     */
     private void handleCardSelection(CardPanel clicked) {
         // Ha kattintottak egy új kártyára → előző kijelöltet töröljük
         if (selectedCardPanel != null && selectedCardPanel != clicked) {
@@ -210,19 +235,35 @@ public class BoardFrame extends JFrame {
         } else {
             selectedCardPanel = clicked;
         }
+
+        // Változás után frissítjük a kijelöléseket
         updateHighlights();
 
     }
 
+    /**
+     * Kezeli a játékostábla egyik mezőjére történő kattintást.
+     * A metódus működése:
+     * Ha egy bábu van a mezőn és az a jelenlegi játékoshoz tartozik,
+     * akkor kijelöli azt.
+     * Ha már ki volt jelölve egy mező és a kattintott mező egy érvényes,
+     * zölden kiemelt célmező, akkor létrehoz és végrehajt egy lépést.
+     * Érvénytelen kattintás esetén (ellenfél bábuja vagy nem highlighted mező)
+     * a lépés megszakad.
+     * Lépés után frissíti a táblát, a kártyákat, popupot jelenít meg,
+     * majd ha szükséges, elindítja a Gépi lépését.
+     *
+     * @param x A kattintott mező X koordinátája (oszlop).
+     * @param y A kattintott mező Y koordinátája (sor).
+     */
     public void handleTileClick(int x, int y) {
 
 
-        // A TilePanel példányt onnan kapjuk meg, ahol eltároltuk őket
         TilePanel clicked = tileGrid[y][x];
         Piece piece = gameState.getBoard()[y][x];
 
 
-        // ❗ Saját kör szabály
+        // Saját kör szabály
         if (selectedTile == null) {
             if (piece != null && piece.getOwner() != gameState.getCurrentPlayer().getId()) {
                 return; // nem a te bábud, nem jelölheted ki
@@ -237,7 +278,7 @@ public class BoardFrame extends JFrame {
             }
         }
 
-        // Ha a mező ki van emelve zölddel → lépni kell!
+        // Ha a mező ki van emelve zölddel - lépni kell!
         if (clicked.isHighlighted() && selectedTile != null && selectedCardPanel != null) {
 
             // Lépés létrehozása
@@ -251,10 +292,9 @@ public class BoardFrame extends JFrame {
             // GameState lépés végrehajtása
             gameState.makeMove(move);
 
-            // UI frissítés
+            // Játéktér frissítése
             refreshBoard();
             refreshCards();
-
             enableCardListenersForCurrentPlayer();
 
 
@@ -272,6 +312,7 @@ public class BoardFrame extends JFrame {
                 return;
             }
 
+            // KÖvetkező játékos kiírása
             ImagePopup.show(
                     this,
                     (gameState.getCurrentPlayer().getId() == 1)
@@ -285,13 +326,11 @@ public class BoardFrame extends JFrame {
             // Jelölések törlése
             selectedTile.setSelected(false);
             selectedTile = null;
-
             selectedCardPanel.setSelected(false);
             selectedCardPanel = null;
-
             updateHighlights();
 
-            // 🔹 ITT hívd az AI-t, ha ő jön
+            // Lehet a gép jön meghívjuk lehetséges lépésre
             maybeTriggerAI();
             return;
         }
@@ -309,20 +348,28 @@ public class BoardFrame extends JFrame {
             clicked.setSelected(true);
             selectedTile = clicked;
         }
+
+        // Módosítások miat kijelölések frissítése
         updateHighlights();
 
 
     }
 
+    /**
+     * A 5x5-ös tábla frissítése
+     */
     private void refreshBoard() {
         for (int y = 0; y < 5; y++) {
             for (int x = 0; x < 5; x++) {
                 tileGrid[y][x].updatePiece();
             }
         }
-        repaint();
     }
 
+
+    /**
+     * Kártyák pozíciójának frissítése
+     */
     private void refreshCards() {
         p1c1Panel.setCard(gameState.getP1Card1());
         p1c2Panel.setCard(gameState.getP1Card2());
@@ -333,6 +380,10 @@ public class BoardFrame extends JFrame {
         repaint();
     }
 
+
+    /**
+     * Körtöl függően kártyák kattinthatóvá tétele
+     */
     private void enableCardListenersForCurrentPlayer() {
         if (gameState.getCurrentPlayer().getId() == 1) {
             p1c1Panel.enableClick();
@@ -350,6 +401,9 @@ public class BoardFrame extends JFrame {
     }
 
 
+    /**
+     * Összes kártya tiltása (nem kattinthatóak)
+     */
     private void disableAllCardListeners() {
         p1c1Panel.disableClick();
         p1c2Panel.disableClick();
@@ -357,30 +411,33 @@ public class BoardFrame extends JFrame {
         p2c2Panel.disableClick();
     }
 
+    /**
+     * Megnézi hogy a Gép köre jön e ha igen kiválasztja a gép mit fog lépni és végbeviszi a lépést
+     */
     private void maybeTriggerAI() {
-        // Ha nem AI jön → játékos kattint
+        // Ha nem a gép jön akkor a játékos köre van.
         if (!gameState.getCurrentPlayer().isAI()) {
             enableCardListenersForCurrentPlayer();
             return;
         } else {
-            disableAllCardListeners();
+            disableAllCardListeners();  // Gép körében egyik kártya sem kattintható
         }
 
         if (gameState.isGameOver()) return;
 
-        // 🔥 WAIT 2.5 SEC BEFORE AI MOVES
+        // Timer: mintha gomdolkodna a gép
         aiThinkTimer = new Timer(2500, e -> {
-
-            // --- AI decides move ---
+            // Kiválaszja a lépést
             Move aiMove = gameState.getCurrentPlayer().decideMove(gameState);
 
+            // Ha lett kiválasztott lépés végrehajtjuk és frissítjuk a táblát és a kártyákat
             if (aiMove != null) {
                 gameState.makeMove(aiMove);
                 refreshBoard();
                 refreshCards();
             }
 
-            // --- Win check ---
+            // Győzelem ellenörzés
             if (gameState.isGameOver()) {
                 int w = gameState.getWinner();
                 String img = (w == 1)
@@ -394,6 +451,7 @@ public class BoardFrame extends JFrame {
                 return;
             }
 
+            // Soron következő játékos
             ImagePopup.show(
                     this,
                     (gameState.getCurrentPlayer().getId() == 1)
@@ -404,10 +462,10 @@ public class BoardFrame extends JFrame {
                     null
             );
 
-            // 🔥 ALWAYS update correct card listeners after AI move
+            // Következő játékos kártyáinak aktiválása
             enableCardListenersForCurrentPlayer();
 
-            // 🔥 Next AI turn (AI vs AI)
+            // Ha a megin a gép jön meghívja ujra a függvényt
             aiNextTimer = new Timer(500, ev -> maybeTriggerAI());
             aiNextTimer.setRepeats(false);
             aiNextTimer.start();
@@ -418,12 +476,22 @@ public class BoardFrame extends JFrame {
         aiThinkTimer.start();
     }
 
+    /**
+     * Gép a gép ellen elindítja az első gépi lépést automatikusan
+     */
     public void startAIGameAfterPopups() {
-        // PIROS az első → ha AI, induljon azonnal
+        // PIROS az első - ha gép, induljon azonnal
         SwingUtilities.invokeLater(this::maybeTriggerAI);
     }
 
+    /**
+     * A Save gomb lenyomásához funkció
+     *
+     * Amikor a save gombot megnyomjuk megkérdezi a felhasználót melyik slotra akarja menteni a játékot,
+     * majd onnan folytatódik a játék ahol elmentette
+     */
     private void showSaveDialog() {
+        // Gépek működésének leállítása
         stopAITimers();
         Object[] options = {"Save Slot 1", "Save Slot 2", "Cancel"};
         int choice = JOptionPane.showOptionDialog(
@@ -442,10 +510,14 @@ public class BoardFrame extends JFrame {
         } else if (choice == JOptionPane.NO_OPTION) {
             saveGameToSlot(2);
         }
-
+        // Ha Gép körében történt a mentés gépnek kell jönnie
         maybeTriggerAI();
     }
 
+    /**
+     * Amikor kiválasztják a slotot a mentéshez ez a függvény hívódik meg ami elmenti a játék aktuális állását
+     * @param slot Egy szám a mentési slot száma
+     */
     private void saveGameToSlot(int slot) {
         try {
             filemanagement.SaveLoadManager.save(gameState, slot);
@@ -468,7 +540,14 @@ public class BoardFrame extends JFrame {
         }
     }
 
+    /**
+     * A Save And Exit gomb lenyomásához funkció
+     *
+     * Amikor a save gombot megnyomjuk megkérdezi a felhasználót melyik slotra akarja menteni a játékot,
+     * majd bezárja az aktuális ablakot és nyit egy új MainMenut
+     */
     private void showExitSaveDialog() {
+        // Gépek működésének leállítása
         stopAITimers();
         Object[] options = {"Save to Slot 1", "Save to Slot 2", "Cancel"};
         int choice = JOptionPane.showOptionDialog(
@@ -484,15 +563,18 @@ public class BoardFrame extends JFrame {
 
         if (choice == JOptionPane.YES_OPTION) {
             saveGameToSlot(1);
-            dispose();
             new MainMenu().setVisible(true);
+            dispose();
         } else if (choice == JOptionPane.NO_OPTION) {
             saveGameToSlot(2);
-            dispose();
             new MainMenu().setVisible(true);
+            dispose();
         }
     }
 
+    /**
+     * A gép timereinek leállítása
+     */
     private void stopAITimers() {
         if (aiThinkTimer != null) {
             aiThinkTimer.stop();
@@ -504,3 +586,5 @@ public class BoardFrame extends JFrame {
         }
     }
 }
+
+

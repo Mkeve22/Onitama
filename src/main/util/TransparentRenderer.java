@@ -6,8 +6,29 @@ import javax.swing.plaf.basic.ComboPopup;
 import java.awt.*;
 
 
-//Csak az kép megjelenítéséért felelős osztály a ComboBox-nál
+/**
+ * Egy átlátszó listacella-renderer, amelyet olyan JComboBox vagy JList elemekhez
+ * lehet használni, amelyek ikonokat jelenítenek meg szöveg nélkül.
+ */
 public class TransparentRenderer extends DefaultListCellRenderer {
+
+    /**
+     * Létrehozza és visszaadja az adott listaelemhez tartozó
+     * megjelenítő komponenst.
+     *
+     * A cella:
+     * - nem tartalmaz szöveget,
+     * - az értéket ikonként jeleníti meg,
+     * - átlátszó hátteret kap,
+     * - eltávolítja a szegélyeket és a kijelölési hátteret.
+     *
+     * @param list          a lista, amelyhez a cella tartozik
+     * @param value         a lista elemének objektuma
+     * @param index         a cella indexe
+     * @param isSelected    jelzi, hogy a cella ki van-e jelölve
+     * @param cellHasFocus  jelzi, hogy a cella fókuszt kapott-e
+     * @return a cella megjelenítésére használt komponens
+     */
     @Override
     public Component getListCellRendererComponent(
             JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -27,5 +48,4 @@ public class TransparentRenderer extends DefaultListCellRenderer {
 
         return l;
     }
-
 }

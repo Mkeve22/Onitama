@@ -5,8 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * @class Main
- * @brief A program belépési pontja, amely elindítja az alkalmazást.
+ * Main
+ * A program belépési pontja, amely elindítja az alkalmazást.
  *
  * A main metódus létrehozza és megjeleníti a főmenüt (MainMenu),
  * ezzel indítva a grafikus felhasználói felületet.
@@ -14,7 +14,7 @@ import java.awt.*;
 public class Main {
 
     /**
-     * @brief Az alkalmazás indítási pontja.
+     * Az alkalmazás indítási pontja.
      *
      * Létrehozza a főmenü ablakát, maximális méretben láthatóvá teszi,
      * és átadja az irányítást a grafikus felhasználói felületnek.

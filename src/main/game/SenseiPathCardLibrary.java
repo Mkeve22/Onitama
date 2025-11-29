@@ -3,8 +3,20 @@ package game;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * Egy kártyagyűjtemény osztálya,
+ * ami létrehozza a kártyacsomagot amiből bekerülnek a játékba a kártyák
+ */
 public class SenseiPathCardLibrary implements CardLibrary {
 
+
+    /**
+     * Létrehozza a kártyagyűjtemény összes kártyáját,
+     * majd egy listában vissza adja
+     *
+     * @return - A kártya gyűjtemény kártyáinak a listája
+     */
     @Override
     public List<Card> getCards() {
         List<Card> cards = new ArrayList<>();

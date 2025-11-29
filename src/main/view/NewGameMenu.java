@@ -9,8 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @class NewGameMenu
- * @brief Az új játék létrehozásáért felelős grafikus felület
+ * NewGameMenu
+ * Az új játék létrehozásáért felelős grafikus felület
  *
  * Itt ki lehet választani a játékmódot
  * -PvP
@@ -29,7 +29,7 @@ public class NewGameMenu  extends JFrame {
     private JComboBox<ImageIcon> cardLibrary;
 
     /**
-     * @brief A NewGameMenu konstruktora
+     * A NewGameMenu konstruktora
      *
      * Létrehozza az új játék létrehozásához szükséges menüt,
      * beállítja a gombokat és azok helyét,
@@ -134,8 +134,8 @@ public class NewGameMenu  extends JFrame {
     }
 
     /**
-     * @class MainMenuActionListener
-     * @brief A „Back TO Menu" gomb eseménykezelője
+     * MainMenuActionListener
+     * A „Back TO Menu" gomb eseménykezelője
      *
      * Új főmenü (MainMenu) ablakot hozz létre,
      * majd bezárja az aktuális új játék menü ablakot.
@@ -145,7 +145,7 @@ public class NewGameMenu  extends JFrame {
         private NewGameMenu frame;
 
         /**
-         * @brief Az eseménykezelő konstruktora.
+         * Az eseménykezelő konstruktora.
          *
          * @param frame A jelenlegi NewGameMenu ablak, amelyet be kell zárni.
          */
@@ -154,7 +154,7 @@ public class NewGameMenu  extends JFrame {
         }
 
         /**
-         * @brief A „BACK TO MENU” gomb kattintásának kezelése.
+         * A „BACK TO MENU” gomb kattintásának kezelése.
          *
          * Létrehoz egy új főmenüt teljes képernyős módban, majd
          * bezárja a NewGameMenu ablakot.
@@ -174,8 +174,8 @@ public class NewGameMenu  extends JFrame {
     }
 
     /**
-     * @class StartGameActionListener
-     * @brief A „START GAME" gomb eseménykezelője
+     * StartGameActionListener
+     * A „START GAME" gomb eseménykezelője
      *
      * A menüben megadott játékmód és kártyagyujteménnyel létrehozza a játékot kezelő osztályt (GameState),
      * majd új játékteret hoz létre,
@@ -185,7 +185,7 @@ public class NewGameMenu  extends JFrame {
         private NewGameMenu frame;
 
         /**
-         * @brief Az eseménykezelő konstruktora.
+         * Az eseménykezelő konstruktora.
          *
          * @param frame A NewGameMenu ablak, amelyből a játék indul.
          */
@@ -195,7 +195,7 @@ public class NewGameMenu  extends JFrame {
 
 
         /**
-         * @brief A „START GAME” gomb eseményének kezelése.
+         * A „START GAME” gomb eseményének kezelése.
          *
          * A kiválasztott játékmódtól függően létrehozza a megfelelő játékosokat (Player vagy Ai),
          * inicializálja a GameState objektumot, betölti a játéktáblát, majd popup üzenetekkel jelzi

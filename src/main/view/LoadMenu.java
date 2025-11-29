@@ -12,8 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @class LoadMenu
- * @brief A mentések betöltésének menüjének grafikus felülete
+ * LoadMenu
+ * A mentések betöltésének menüjének grafikus felülete
  *
  * Ez az osztály hozza létre a mentések betölltésének menüjét, amelyen három gomb van:
  * - SAVE 1: Egyes save slot betöltése
@@ -30,7 +30,7 @@ public class LoadMenu extends JFrame {
     private JButton backmenu = new ImageButton("/LoadMenu/back.png", "/LoadMenu/back_press.png", 381, 146);
 
     /**
-     * @brief A LoadMenu konstruktora
+     * A LoadMenu konstruktora
      *
      * Létrehozza a betöltés menüjét, beállítja a háttérképet, a gombok pozícióját,
      * kinézetét, és regisztrálja a hozzájuk tartozó funkciókat.
@@ -77,8 +77,8 @@ public class LoadMenu extends JFrame {
     }
 
     /**
-     * @class BackButtonListener
-     * @brief A „BACK TO MENU" gomb eseménykezelője
+     * BackButtonListener
+     * A „BACK TO MENU" gomb eseménykezelője
      *
      * Új főmenü (MainMenu) ablakot hozz létre,
      * majd bezárja az aktuális új játék menü ablakot.
@@ -89,7 +89,7 @@ public class LoadMenu extends JFrame {
 
 
         /**
-         * @brief Az eseménykezelő konstruktora.
+         * Az eseménykezelő konstruktora.
          *
          * @param loadMenu Az éppen megnyitott LoadMenu, amelyet be kell zárni.
          */
@@ -98,7 +98,7 @@ public class LoadMenu extends JFrame {
         }
 
         /**
-         * @brief A „BACK TO MENU” gomb kattintásának kezelése.
+         * A „BACK TO MENU” gomb kattintásának kezelése.
          *
          * Létrehozza és megjeleníti a főmenü ablakát,
          * majd bezárja a jelenlegi LoadMenu ablakot.
@@ -118,7 +118,7 @@ public class LoadMenu extends JFrame {
     }
 
     /**
-     * @brief A SAVE slotok betöltésének eseménye
+     * A SAVE slotok betöltésének eseménye
      *
      * Megvizsgálja hogy létezik e a slot amit betöltenénk,
      * majd betölti a játék állását és létrehozza a játékteret, és bezárja az aktuális ablakot
@@ -196,7 +196,7 @@ public class LoadMenu extends JFrame {
     }
 
     /**
-     * @brief A játékmódhoz tartozó képfájl elérési útvonalát adja vissza.
+     * A játékmódhoz tartozó képfájl elérési útvonalát adja vissza.
      *
      * Ez a metódus a GameMode enum alapján kiválasztja és visszaadja azt a képet,
      * amely a betöltés után megjelenő popupon használatos.

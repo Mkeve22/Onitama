@@ -8,8 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 /**
- * @class MainMenu
- * @brief A játék kezdőképernyőjéért felelős grafikus felület.
+ * MainMenu
+ * A játék kezdőképernyőjéért felelős grafikus felület.
  *
  * Ez az osztály hozza létre a teljes képernyős főmenüt, amely három gombot tartalmaz:
  * - New Game: új játék indítása
@@ -27,7 +27,7 @@ public class MainMenu extends JFrame {
 
 
     /**
-     * @brief A MainMenu konstruktora.
+     * A MainMenu konstruktora.
      *
      * Létrehozza a kezdőképernyőt, beállítja a háttérképet, a gombok pozícióját,
      * kinézetét, és regisztrálja a hozzájuk tartozó funkciókat.
@@ -74,8 +74,8 @@ public class MainMenu extends JFrame {
         backgroundPanel.add(buttonPanel, gbc);
     }
     /**
-     * @class NewGameActionListener
-     * @brief Az „NEW GAME” gomb eseménykezelője.
+     * NewGameActionListener
+     * Az „NEW GAME” gomb eseménykezelője.
      *
      * Új NewGameMenu ablakot hoz létre teljes képernyős módban,
      * majd bezárja az aktuális főmenü ablakot.
@@ -85,7 +85,7 @@ public class MainMenu extends JFrame {
         private final JFrame currentFrame;
 
         /**
-         * @brief Az eseménykezelő konstruktora.
+         * Az eseménykezelő konstruktora.
          * @param currentFrame Az aktuális főmenü ablaka, amelyet be kell zárni.
          */
         public NewGameActionListener(JFrame currentFrame) {
@@ -93,7 +93,7 @@ public class MainMenu extends JFrame {
         }
 
         /**
-         * @brief A „NEW GAME” gomb kattintásának kezelése.
+         * A „NEW GAME” gomb kattintásának kezelése.
          *
          * Új játékindító menüt hoz létre teljes képernyős módban,
          * láthatóvá teszi, majd bezárja a jelenlegi főmenüt.
@@ -113,8 +113,8 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * @class QuitActionListener
-     * @brief Az alkalmazás bezárásáért felelő eseménykezelő
+     * QuitActionListener
+     * Az alkalmazás bezárásáért felelő eseménykezelő
      *
      * Bezárja az ablakot és kilép a programból
      */
@@ -122,7 +122,7 @@ public class MainMenu extends JFrame {
         private final JFrame currentFrame;
 
         /**
-         * @brief Konstruktor.
+         * Konstruktor.
          * @param currentFrame Az aktuális ablak, amely bezárandó.
          */
         public QuitActionListener(JFrame currentFrame) {
@@ -130,7 +130,7 @@ public class MainMenu extends JFrame {
         }
 
         /**
-         * @brief A „QUIT” gomb eseményének kezelése.
+         * A „QUIT” gomb eseményének kezelése.
          *
          * Bezárja az ablakot és teljesen kilép a programból.
          *
@@ -144,18 +144,18 @@ public class MainMenu extends JFrame {
     }
 
     /**
-     * @class LoadButtonListener
-     * @brief A „LOAD" gomb eseménykezelője
+     * LoadButtonListener
+     * A „LOAD" gomb eseménykezelője
      *
      * Új LoadMenut hoz létre teljes képernyőben,
      * majd bezárja az aktuális főmenü ablakot.
      */
     class LoadButtonListener implements ActionListener {
+
         private final JFrame currentFrame;
 
-
         /**
-         * @brief Konstruktor.
+         * Konstruktor.
          * @param currentFrame Az aktuális főmenü ablak.
          */
         public LoadButtonListener(JFrame currentFrame) {
@@ -163,7 +163,7 @@ public class MainMenu extends JFrame {
         }
 
         /**
-         * @brief A „LOAD” gomb kattintásának kezelése.
+         * A „LOAD” gomb kattintásának kezelése.
          *
          * Megnyitja a mentésbetöltő menüt, teljes képernyőre állítja,
          * majd bezárja a jelenlegi főmenüt.
