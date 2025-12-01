@@ -1,11 +1,11 @@
 {
 "currentPlayerId":1,
 "board":[[{"player":2,"master":false},{"player":2,"master":false},{"player":2,"master":true},{"player":2,"master":false},{"player":2,"master":false}],[null,null,null,null,null],[null,null,null,null,null],[null,null,null,null,null],[{"player":1,"master":false},{"player":1,"master":false},{"player":1,"master":true},{"player":1,"master":false},{"player":1,"master":false}]],
-"p1c1":"Ox",
-"p1c2":"Crab",
-"p2c1":"Monkey",
+"p1c1":"Elephant",
+"p1c2":"Goose",
+"p2c1":"Boar",
 "p2c2":"Rabbit",
-"centerCard":"Goose",
-"gamemod":"PLAYER_VS_AI",
+"centerCard":"Dragon",
+"gamemod":"PLAYER_VS_PLAYER",
 "library":0
 }

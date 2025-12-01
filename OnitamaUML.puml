@@ -1,0 +1,408 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+interface CardLibrary {
+    ~ getCards(): List<Card>
+}
+
+class BoardFrame {
+    ' Minden custom osztályra mutató mező (gameState, panelek) kivéve
+    ' Standard Java mezők maradnak:
+    - aiThinkTimer: Timer
+    - aiNextTimer: Timer
+
+    + BoardFrame(gameState: GameState)
+    - updateHighlights(): void
+    - handleCardSelection(panel: CardPanel): void
+    + handleTileClick(x: int, y: int): void
+    - refreshBoard(): void
+    - refreshCards(): void
+    - enableCardListenersForCurrentPlayer(): void
+    - disableAllCardListeners(): void
+    - maybeTriggerAI(): void
+    + startAIGameAfterPopups(): void
+    - showSaveDialog(): void
+    - saveGameToSlot(slot: int): void
+    - showExitSaveDialog(): void
+    - stopAITimers(): void
+}
+
+class ImagePopup {
+    + show(parent: JFrame, text: String, w: int, h: int, delay: int, callback: Runnable): void
+}
+
+class SenseiPathCardLibrary {
+    + getCards(): List<Card>
+}
+
+class DeckManager {
+    ' Minden mező kivéve (kapcsolatok lent)
+    + DeckManager(library: CardLibrary)
+    + dealcard(): void
+    + getCenter(): Card
+    + getPlayer1Cards(): List<Card>
+    + getPlayer2Cards(): List<Card>
+}
+
+class TransparentRenderer {
+    + getListCellRendererComponent(list: JList<?>, value: Object, index: int, isSelected: boolean, cellHasFocus: boolean): Component
+}
+
+class CardClickListener {
+    ' cardPanel kivéve -->
+    + CardClickListener(panel: CardPanel)
+    + mousePressed(e: MouseEvent): void
+}
+
+class Card {
+    - name: String
+    - imagepath: String
+    - moves: int[][]
+
+    + Card(name: String, imagepath: String, moves: int[][])
+    + getName(): String
+    + getImagepath(): String
+    + getMoves(): int[][]
+}
+
+class NewGameMenu {
+    ' Gombok kivéve -->
+    - gamemod: JComboBox<ImageIcon>
+    - cardLibrary: JComboBox<ImageIcon>
+
+    + NewGameMenu()
+}
+
+class NewGameMenu$MainMenuActionListener {
+    ' frame kivéve -->
+    + MainMenuActionListener(frame: NewGameMenu)
+    + actionPerformed(e: ActionEvent): void
+}
+
+class NewGameMenu$StartGameActionListener {
+    ' frame kivéve -->
+    + StartGameActionListener(frame: NewGameMenu)
+    + actionPerformed(e: ActionEvent): void
+}
+
+class HumanPlayer {
+    - id: int
+
+    + HumanPlayer(id: int)
+    + getId(): int
+    + isAI(): boolean
+    + decideMove(state: GameState): Move
+}
+
+class AIPlayer {
+    - id: int
+    - rnd: Random
+
+    + AIPlayer(id: int)
+    + getId(): int
+    + isAI(): boolean
+    + decideMove(state: GameState): Move
+
+    - generateMovesForPiece(x: int, y: int, p: Piece, c: Card, state: GameState): List<Move>
+    - evaluateMove(m: Move, s: GameState): int
+    - centerScore(x: int, y: int): int
+    - approachEnemyMaster(m: Move, s: GameState): int
+    - keepsPieceSafe(m: Move, s: GameState): boolean
+    - wouldTempleWin(m: Move, s: GameState): boolean
+    - isMasterThreatened(s: GameState): boolean
+    - getThreateningPositions(s: GameState): List<int[]>
+    - cloneAndSimulateMove(s: GameState, m: Move): GameState
+}
+
+class BackgroundPanel {
+    - backgroundImage: Image
+
+    + BackgroundPanel(path: String)
+    # paintComponent(g: Graphics): void
+}
+
+class SaveLoadManager {
+    - SAVE_FOLDER: String
+    - SLOT1: Path
+    - SLOT2: Path
+
+    + save(state: GameState, slot: int): void
+    + load(slot: int): GameState
+    + slotExists(slot: int): boolean
+}
+
+class BaseCardLibrary {
+    + getCards(): List<Card>
+}
+
+class MainMenu {
+    ' Gombok kivéve -->
+    + MainMenu()
+}
+
+class MainMenu$NewGameActionListener {
+    - currentFrame: JFrame
+    + NewGameActionListener(frame: JFrame)
+    + actionPerformed(e: ActionEvent): void
+}
+
+class MainMenu$QuitActionListener {
+    - currentFrame: JFrame
+    + QuitActionListener(frame: JFrame)
+    + actionPerformed(e: ActionEvent): void
+}
+
+class MainMenu$LoadButtonListener {
+    - currentFrame: JFrame
+    + LoadButtonListener(frame: JFrame)
+    + actionPerformed(e: ActionEvent): void
+}
+
+class Main {
+    + main(args: String[]): void
+}
+
+class TransparentComboBox {
+    # createArrowButton(): JButton
+    + paintCurrentValueBackground(...): void
+    # createPopup(): ComboPopup
+    + installUI(c: JComponent): void
+}
+
+class TransparentComboPopup {
+    + TransparentComboPopup(combo: JComboBox)
+    # createScroller(): JScrollPane
+    + show(): void
+}
+
+class Move {
+    ' Card itt maradhat szövegesen, vagy kivehető, ha nagyon szigorúak vagyunk,
+    ' de a Move csak hivatkozik rá, nem birtokolja. Itt hagyom a jobb olvashatóságért.
+    + fromX: int
+    + toX: int
+    + card: Card
+
+    + Move(fromX: int, fromY: int, toX: int, toY: int, card: Card)
+}
+
+interface Player {
+    ~ getId(): int
+    ~ isAI(): boolean
+    ~ decideMove(state: GameState): Move
+}
+
+class CardPanel {
+    ' Card kivéve -->
+    - cardImage: Image
+    - selected: Boolean
+    - rotated: boolean
+
+    + CardPanel(card: Card, selectable: boolean)
+    + isSelected(): Boolean
+    + setSelected(selected: boolean): void
+    + getCard(): Card
+    + setCard(card: Card): void
+    + setRotated(rotated: boolean): void
+    + enableClick(): void
+    + disableClick(): void
+    # paintComponent(g: Graphics): void
+}
+
+class TileClickListener {
+    - x: int
+    - y: int
+    ' controller kivéve -->
+    + TileClickListener(x: int, y: int, controller: BoardFrame)
+    + mousePressed(e: MouseEvent): void
+}
+
+class TransparentScrollPane {
+    + TransparentScrollPane(content: JComponent)
+}
+
+class TilePanel {
+    - x: int
+    - y: int
+    ' state és frame kivéve -->
+    - selected: boolean
+    - highlighted: boolean
+    - redMaster: Image
+    - redStudent: Image
+    - blueMaster: Image
+    - blueStudent: Image
+
+    + TilePanel(x: int, y: int, state: GameState, frame: BoardFrame)
+    + setHighlighted(b: boolean): void
+    + updatePiece(): void
+    + isHighlighted(): boolean
+    + setSelected(b: boolean): void
+    # paintComponent(g: Graphics): void
+    + getTileX(): int
+    + getTileY(): int
+}
+
+class GameState {
+    ' Minden custom osztály kivéve -->
+    - winner: Integer
+    - library: int
+
+    + GameState(p1: Player, p2: Player, mode: GameMode, library: int)
+    + getMode(): GameMode
+    + getWinner(): Integer
+    + isGameOver(): boolean
+    + getPlayer1(): Player
+    + getPlayer2(): Player
+    + getLibrary(): int
+    - initBoard(): void
+    - initDeck(library: int): void
+    + getBoard(): Piece[][]
+    + getCurrentPlayer(): Player
+    + getP1Card1(): Card
+    + getP1Card2(): Card
+    + getP2Card1(): Card
+    + getP2Card2(): Card
+    + getCenterCard(): Card
+    + makeMove(move: Move): boolean
+    - switchPlayer(): void
+    + setBoard(board: Piece[][]): void
+    + setCurrentPlayer(p: Player): void
+    + setP1Cards(c1: Card, c2: Card): void
+    + setP2Cards(c1: Card, c2: Card): void
+    + setCenterCard(c: Card): void
+    + setGameMode(mode: GameMode): void
+}
+
+class CardLook {
+    ' Listák kivéve -->
+    + getbyName(name: String): Card
+}
+
+class LoadMenu {
+    ' Gombok kivéve -->
+    + LoadMenu()
+    - loadSlot(slot: int): void
+    - getGameModeImage(mode: GameMode): String
+}
+
+class LoadMenu$BackButtonListener {
+    ' loadMenu kivéve -->
+    + BackButtonListener(menu: LoadMenu)
+    + actionPerformed(e: ActionEvent): void
+}
+
+class ImageButton {
+    - image: Image
+    - pressedImage: ImageIcon
+
+    + ImageButton(img: String, pressed: String, w: int, h: int)
+    # paintComponent(g: Graphics): void
+}
+
+class Piece {
+    - owner: int
+    - master: boolean
+
+    + Piece(owner: int, master: boolean)
+    + getOwner(): int
+    + isMaster(): boolean
+}
+
+enum GameMode {
+    PLAYER_VS_PLAYER
+    PLAYER_VS_AI
+    AI_VS_AI
+}
+
+' ==========================================
+' KAPCSOLATOK (Relationships)
+' ==========================================
+
+CardLibrary <|.. SenseiPathCardLibrary
+CardLibrary <|.. BaseCardLibrary
+
+Player <|.. HumanPlayer
+Player <|.. AIPlayer
+
+' Belső osztályok (Nesting)
+NewGameMenu +.. NewGameMenu$MainMenuActionListener
+NewGameMenu +.. NewGameMenu$StartGameActionListener
+MainMenu +.. MainMenu$NewGameActionListener
+MainMenu +.. MainMenu$QuitActionListener
+MainMenu +.. MainMenu$LoadButtonListener
+LoadMenu +.. LoadMenu$BackButtonListener
+
+' Listener hivatkozások (A kivett mezők helyett)
+NewGameMenu$MainMenuActionListener --> NewGameMenu
+NewGameMenu$StartGameActionListener --> NewGameMenu
+LoadMenu$BackButtonListener --> LoadMenu
+CardClickListener --> CardPanel
+TileClickListener o-- BoardFrame
+
+' TilePanel kapcsolatai (A kivett mezők helyett)
+TilePanel --> GameState
+TilePanel --> BoardFrame
+
+' BoardFrame kompozíciók
+BoardFrame *-- CardPanel : selectedCardPanel
+BoardFrame *-- CardPanel : p1c1Panel
+BoardFrame *-- CardPanel : p1c2Panel
+BoardFrame *-- CardPanel : p2c1Panel
+BoardFrame *-- CardPanel : p2c2Panel
+BoardFrame *-- CardPanel : centerPanel
+BoardFrame *-- TilePanel : selectedTile
+BoardFrame *-- TilePanel : tileGrid[][]
+BoardFrame *-- GameState : gameState
+
+' DeckManager kompozíciók
+DeckManager *-- Card : deck *
+DeckManager *-- Card : player1 *
+DeckManager *-- Card : player2 *
+DeckManager *-- Card : center
+
+' GameState kompozíciók
+GameState *-- Player : player1
+GameState *-- Player : player2
+GameState *-- Player : currentPlayer
+GameState *-- Piece : board[][]
+GameState *-- Card : p1Card1
+GameState *-- Card : p1Card2
+GameState *-- Card : p2Card1
+GameState *-- Card : p2Card2
+GameState *-- Card : centerCard
+GameState *-- DeckManager : deck
+GameState *-- GameMode : mode
+
+' CardPanel
+CardPanel *-- Card : card
+
+' CardLook
+CardLook *-- Card : basecards *
+CardLook *-- Card : senseiscard *
+
+' UI Elemek közötti kapcsolatok
+NewGameMenu *-- ImageButton : backmain
+NewGameMenu *-- ImageButton : start
+NewGameMenu ..> TransparentComboBox
+
+MainMenu *-- ImageButton : newGameButton
+MainMenu *-- ImageButton : loadButton
+MainMenu *-- ImageButton : quit
+
+LoadMenu *-- ImageButton : save1
+LoadMenu *-- ImageButton : save2
+LoadMenu *-- ImageButton : backmenu
+
+MainMenu ..> BackgroundPanel : <<creates>>
+NewGameMenu ..> BackgroundPanel : <<creates>>
+LoadMenu ..> BackgroundPanel : <<creates>>
+
+' Transparent belső kapcsolatok (EZ AZ ÚJ RÉSZ):
+TransparentComboBox ..> TransparentComboPopup
+TransparentComboBox ..> TransparentRenderer
+TransparentComboPopup ..> TransparentScrollPane
+Main ..> MainMenu : <<creates>>
+
+GameState ..> BaseCardLibrary : <<creates>>
+GameState ..> SenseiPathCardLibrary : <<creates>>
+
+@enduml
